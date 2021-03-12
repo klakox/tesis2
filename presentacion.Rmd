@@ -1,0 +1,975 @@
+---
+title: "Propuesta de un método de imputación basado en la distribución Normal multivariada para los registros de $PM_{2.5}$ en la ciudad de Cali"
+
+subtitle: "⚔<br/>with xaringan"
+author: "Esteban Arroyave - Alejandro Villarreal"
+date: "`r Sys.Date()`"
+output: 
+  xaringan::moon_reader:
+    css: [default, metropolis, metropolis-fonts]
+  
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(tidyverse)
+library(lubridate)
+library(reshape)
+library(plotly)
+library(ggcorrplot)
+
+
+```
+
+class: center, middle
+### /ʃæ.'riŋ.ɡæn/
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ TeX: { equationNumbers: {autoNumber: "all"} } });
+</script>
+
+---
+#Resumen
+
+<div style="text-align: justify;
+margin-top:100px"
+
+<div/>
+
+Se propone un método de imputación de datos faltantes del contaminante $PM_{2.5}$, de la estación Univalle, 2018. Cada día de la semana se asume distribuido normal 24-variado y a partir de las propiedades de esta distribución, se imputan los datos hallando las distribuciones condicionales para las horas faltantes a partir de las horas disponibles. Se prueba el supuesto de datos faltantes completamente al azar (MCAR) mediante el test de Little (1988) y se prueba normalidad multivariada usando el test de Mardia (1970). Se evalúa la propuesta vía simulación, obteniendo valores promedio de $R^2= 0.47$ y $RMSE=8.6$ respectivamente, lo que muestra que la propuesta es promisoria mejorando imputaciones anteriormente utilizadas.
+
+
+
+
+---
+#Planteamiento del problema
+
+
+
+---
+#Justificación
+
+
+
+---
+#Objetivos
+
+
+
+
+---
+#Antecedentes
+
+
+
+---
+
+#Marco teórico 
+
+<div style="text-align: justify;
+margin-top:100px">
+
+<div/>
+
+## $PM_{2.5}$
+
+
+ Conjunto de partículas suspendidas en el aire que tienen tamaño menor o igual a $2 . 5 \mu m$ (micras).  conformadas por  sustancias  químicas  tales  como  Sulfato,  Nitrato,  Amoniaco,  Carbón  y  Metales pesados. El $PM_{2_{\cdot }5}$ en estado de "acumulación" (entre 0.1 y 0.2 $\mu m$) pueden durar suspendidas varios días en el aire. 
+
+Se afirma que el tamaño del material partículado está inversamente relacionado con el potencial para contraer  problemas de salud cardiovascular (OMS, 2018), debido a que las partículas que ingresan por las vías respiratorias pueden alojarse en los pulmones, o pasar directamente a los vasos sanguíneos
+
+---
+
+#Marco teórico
+
+
+<div style="margin-bottom:100px;">
+</div>
+<center>
+
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-dvpl{border-color:inherit;text-align:right;vertical-align:top}
+</style>
+<table class="tg">
+<thead>
+  <tr>
+    <th class="tg-dvpl">Lugar</th>
+    <th class="tg-dvpl">Tiempo de Exposición</th>
+    <th class="tg-dvpl">Nivel Máx.</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-dvpl">Minambiente</td>
+    <td class="tg-dvpl">Anual</td>
+    <td class="tg-dvpl">25 $\mu g/m^3$</td>
+  </tr>
+  <tr>
+    <td class="tg-dvpl"></td>
+    <td class="tg-dvpl">Diario</td>
+    <td class="tg-dvpl">50 $\mu g/m^3$</td>
+  </tr>
+  <tr>
+    <td class="tg-dvpl">ONU</td>
+    <td class="tg-dvpl">Anual</td>
+    <td class="tg-dvpl">10 $\mu g/m^3$</td>
+  </tr>
+  <tr>
+    <td class="tg-dvpl"></td>
+    <td class="tg-dvpl">Diario</td>
+    <td class="tg-dvpl">25 $\mu g/m^3$</td>
+  </tr>
+</tbody>
+</table>
+</center>
+<div style="text-align: center">
+Tabla 1: Nivel máximo de exposición permisible del contaminante $PM_{2_{\cdot }5}$
+<div/>
+
+<div style="text-align: justify">
+
+
+Los niveles máximos permisibles internacionales son más estrictos y Colombia se piensa igualar su norma a este nivel para el año 2030
+<div/>
+
+
+---
+
+# Marco teórico
+
+## Datos faltantes
+
+<div style="text-align: justify">
+
+Sea $Y = (Y_1,...,Y_n)$ un vector aleatorio con función de probabilidad $f_{\theta}$,  donde  $\theta$ es el vector de parámetros de interés, y a $M = (M_i,...,M_n)$ como el indicador de falta asociado al vector aleatorio Y, que toma el valores:
+<div/>
+
+$$m_i = \left\{\begin{matrix}
+ \,\, 0 \,\,  \,\,\,\, si \,\, x_i\, no \,\, es \,\, observada \\ \\
+1 \,\,  \,\,\,\, si \,\,x_i\,\, es \,\,\,\, observada  \,\,\,\,\,\,
+\end{matrix}\right.$$
+
+<div style="text-align: justify">
+La probabilidad de que $M$ tome el valor de $m=(m_1,...,m_n)$ dado que $Y$ toma el valor de $y=y_1,...,y_n$ es:
+<div/>
+
+$$g_\phi(m|y) = g_\phi(m|(y_{(0)},y_{(1)}))$$
+
+
+---
+
+# Marco teórico
+
+## Datos faltantes
+
+<div style="text-align: justify">
+
+Rubin (1976) Plantea formalmente el fenómeno de datos faltantes, de los cuales se identifican tres principales situaciones en la literatura: 
+
+
+
+- Los datos faltantes son perdidos totalmente al azar (MCAR): 
+Es el supuesto más general en el que se afirma que el proceso generador es independiente de la variable de interés Y:
+
+$$g_{\phi}(m|y)= g_{\phi}(m)$$
+    
+- Los datos faltantes son perdidos al azar (MAR): Este supuesto afirma que el proceso generador de faltas depende solo de los datos observados:
+
+$$g_{\phi}(m|y)= g(m|y_{(1)})$$
+
+<div/>
+
+---
+
+# Marco teórico
+
+## Datos faltantes
+
+<div style="text-align: justify">
+- Los datos faltantes no son perdidos al azar (MNAR): Dicho supuesto radica en que la presencia de un dato faltante en una variable Y depende tanto de sus valores observados como sus valores perdidos, que en términos de probabilidad se denota como:
+
+$$g_{\phi}(m|y) = g_{\phi}(m| y_{(1)},y_{(0)})$$
+
+Así pues, la probabilidad de que falten datos en $Y$ depende tanto de los valores observados como de los valores perdidos.
+<div/>
+
+
+
+
+---
+
+# Marco teórico
+
+## Test de Little para probar MCAR
+
+---
+
+# Marco teórico
+
+## Normal multivariada
+
+<div style="text-align: justify">
+
+La función de densidad multivariada es una generalización de la densidad normal univariada. Así, dado un vector aleatorio $\mathbf{X}^T=[X_1,X_2,...,X_p]$ con distribución normal p-variada su función de densidad se denota a continuación:
+ 
+$$f(\mathbf{x})=\frac{1}{(2\pi)^{p/2}\left| \Sigma \right| ^{1/2}}e^{-\frac{1}{2}(\mathbf{x}-\boldsymbol{\mu})^T\Sigma^{-1}(\mathbf{x}-\boldsymbol{\mu})}$$
+ 
+- $\mu$: Representa el vector de medias del vector aleatorio.
+    
+- $\Sigma$: La matriz de varianzas y covarianzas entre cada una de las p variables.
+
+
+<div/>
+
+
+---
+
+# Marco teórico
+
+## Normal multivariada
+
+### Propiedades
+
+<div style="text-align: justify">
+- Todo subconjunto de $\mathbf{X}$ se distribuye normal multivariado. Si se particionan $\mathbf{X}$, $\boldsymbol{\mu}$ y $\Sigma$ respectivamente como
+
+$$\underset{(p\times 1)}{\mathbf{X}}=\left[\begin{array}{c}
+\underset{(q\times 1)}{\mathbf{X_1}}\\\hdashline
+\underset{((p-q)\times 1)}{\mathbf{X_2}}\end{array}
+\right]\; \; \; \;\underset{(p\times 1)}{\boldsymbol{\mu}}=\left[
+\begin{array}{c}\underset{(q\times 1)}{\boldsymbol{\mu_1}}\\ 
+\hdashline\underset{((p-q)\times 1)}{\boldsymbol{\mu_2}}\end{array}
+\right]$$
+     
+$$\underset{(p\times p)}{\Sigma}=\left[
+    \begin{array}{c; : ;c}
+       \underset{(q\times q)}{\Sigma_{11}}   &  \underset{(q\times (p-q))}{\Sigma_{12}} \\ \hdashline
+        \underset{((p-q)\times q))}{\Sigma_{21}} & \underset{((p-q)\times (p-q)))}{\Sigma_{22}} 
+    \end{array}
+\right]$$
+
+
+
+<div/>
+
+
+
+---
+
+# Marco teórico
+
+## Normal multivariada
+
+### Propiedades
+
+<div style="text-align: justify">
+
+- Teniendo el mismo escenario anterior, la distribución condicional de $\mathbf{X_1}$ dado que $\mathbf{X_2}=\mathbf{x_2}$ es normal con
+
+
+$$\begin{matrix}
+\boldsymbol{\mu}_{\mathbf{X_1|X_2=x2}}=\boldsymbol{\mu_1}+\Sigma_{12}\Sigma_{22}^{-1}(\mathbf{x_2}-\boldsymbol{\mu_2})\\\\\Sigma_{\mathbf{X_1| X_2=x2}}=\Sigma_{11}-\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}
+\end{matrix}$$
+         
+Enunciado de otra forma, la distribución de $\mathbf{X_1}|\mathbf{X_2}=\mathbf{x_2}$ es $N_q(\boldsymbol{\mu_1}+\Sigma_{12}\Sigma_{22}^{-1}(\mathbf{x_2}-\boldsymbol{\mu_2}),\Sigma_{11}-\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21})$
+
+<div/>
+
+---
+
+# Marco teórico
+
+## Normal multivariada
+
+### Estimación
+
+
+<div style="text-align: justify">
+
+
+Para hallar los estimadores de $\boldsymbol{\mu}$ y $\Sigma$ se usa el método de estimación por máxima verosimilitud teniendo como resultado que:
+ 
+$$\boldsymbol{\hat{\mu}}=\mathbf{\bar{X}}=\frac{1}{n}\sum_{j=1}^{n}\mathbf{X_j }    \, \, \, \, \, Y \, \, \, \, \,
+\hat{\Sigma}=\mathbf{S}=\frac{1}{n-1}\sum_{j=1}^{n}\left ( \mathbf{X_j}-\mathbf{\bar{X}} \right )\left (\mathbf{ X_j}-\mathbf{\bar{X}} \right )^{T}$$
+ 
+En este caso $S$ pueden presentar problemas de condicionamiento debido a que $n \approx p$. Godino Gomez (2014)
+
+<div/>
+
+---
+
+# Marco teórico
+
+## Normal multivariada
+
+### Estimador de shrinkage
+
+<div style="text-align: justify">
+
+
+Se presenta una estimación diferente de las matrices de varianza y convarianza mediante el estimador de Shrinkage o encogimiento, que se denota de la siguiente manera:
+
+$$\Sigma^*  = \lambda T + (1-\lambda) S$$
+
+Donde T es llamada matriz objetivo y representa un modelo reducido de la matriz de covarianzas en el que se estiman menos parámetros y $\lambda \,\, \in [0,1]$ representa la intensidad de contracción (Schäfer \& Strimmer 2005).
+
+$$T=\begin{Bmatrix}
+s_{ii}& si, i=j\\ 
+0 & si, i\neq j
+\end{Bmatrix}$$
+
+<div/>
+---
+
+# Marco teórico
+
+## Metodología de imputación
+
+<div style="text-align: justify">
+
+El método de imputación propuesto se encuentra basado en el siguiente proceso generador:
+
+$$\mathbf{X_j}\sim N_{24}(\mathbf{\bar{X}_j},\mathbf{S_j} ); \; \; \; \; \; \; j=1,2,...,7$$
+
+
+Donde $j$ se refiere a cada día de la semana comenzando por el lunes y terminando en el domingo. $\mathbf{\bar{X}_j}$ y $\mathbf{S_j}$ son los estimadores máximo verosímiles  de los parámetros de la distribución normal multivariada de cada día. 
+ 
+Así el método de imputación propuesto se basa en utilizar la distribución condicional de $\mathbf{X_{j1}}|\mathbf{X_{j2}}=\mathbf{x_{j2}}$ en un día $k$ donde se tienen $m_k$ datos faltantes, donde:
+
+
+- $\mathbf{X_{j1}}$ Hace referencia a los $m_k$ datos que se deben imputar en ese día.
+     
+- $\mathbf{X_{j2}}=\mathbf{x_{j2}}$ Serán los datos que se observaron en ese día.
+
+<div/>
+
+---
+
+
+# Marco teórico
+
+## Generación de escenarios de simulación
+
+<div style="text-align: justify">
+
+
+Nota:
+
+- Un día podrá tener de 1 a 6 mediciones faltantes consecutivas como máximo ya que de acuerdo a la norma, debe contarse con al menos el 75\% de información para realizar análisis y estimaciones de indicadores.
+
+- La generación de los escenarios se realiza siguiendo la metodología propuesta por Otero $\&$ Presiga (2018), este método comienza haciendo un análisis de los datos faltantes en brechas horarias.
+
+- Definición: Brecha de tamaño n: Una brecha de tamaño n, con $n \in (1,...,6)$ cuenta con $n$ horas seguidas en las que hay datos faltantes pero antes y después de estas no pueden haber horas que presentan datos faltantes.
+ 
+
+<div/>
+
+
+---
+
+
+
+# Marco teórico
+
+## Generación de escenarios de simulación
+
+
+<center>
+
+<img src="borisbrechas.png" style="width:65%">
+
+</center>
+
+<div style="text-align: center">
+Figura 2: sep $PM_{2_{\cdot }5}$
+<div/>
+
+<!-- ![](borisbrechas.png) -->
+
+---
+
+
+
+# Marco teórico
+
+## Generación de escenarios de simulación
+
+<style type="text/css">
+.tg  {border:none;border-collapse:collapse;border-spacing:0;}
+.tg td{border-style:solid;border-width:0px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;
+  padding:10px 5px;word-break:normal;}
+.tg th{border-style:solid;border-width:0px;font-family:Arial, sans-serif;font-size:14px;font-weight:normal;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-c3ow{border-color:inherit;text-align:center;vertical-align:top}
+.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
+.tg .tg-dvpl{border-color:inherit;text-align:right;vertical-align:top}
+</style>
+<table class="tg">
+<thead>
+  <tr>
+    <th class="tg-0pky">Tipo de brecha</th>
+    <th class="tg-0pky">Frec. Abs. (días)</th>
+    <th class="tg-0pky"> $f_i$ </th>
+    <th class="tg-0pky"> $F_i$ </th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-0pky">Brechas de tamaño 1</td>
+    <td class="tg-dvpl">78</td>
+    <td class="tg-dvpl">0,6783</td>
+    <td class="tg-dvpl">0,6783</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">Brechas de tamaño 2</td>
+    <td class="tg-dvpl">18</td>
+    <td class="tg-dvpl">0,1565</td>
+    <td class="tg-dvpl">0,8348</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">Brechas de tamaño 3</td>
+    <td class="tg-dvpl">7</td>
+    <td class="tg-dvpl">0,0609</td>
+    <td class="tg-dvpl">0,8957</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">Brechas de tamaño 4</td>
+    <td class="tg-dvpl">2</td>
+    <td class="tg-dvpl">0,0174</td>
+    <td class="tg-dvpl">0,9130</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">Brechas de tamaño 5</td>
+    <td class="tg-dvpl">4</td>
+    <td class="tg-dvpl">0,0348</td>
+    <td class="tg-dvpl">0,9478</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">Brechas de tamaño 6</td>
+    <td class="tg-dvpl">6</td>
+    <td class="tg-dvpl">0,0522</td>
+    <td class="tg-dvpl">1</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">Total</td>
+    <td class="tg-dvpl">115</td>
+    <td class="tg-dvpl">1</td>
+    <td class="tg-c3ow">-</td>
+  </tr>
+</tbody>
+</table>
+<div style="text-align: center">
+Tabla 2: Distribución de días de acuerdo al tipo de brecha de faltantes
+<div/>
+
+---
+
+# Marco teórico
+
+## Generación de escenarios de simulación
+
+<style type="text/css">
+.tg  {border:none;border-collapse:collapse;border-spacing:0;}
+.tg td{border-style:solid;border-width:0px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;
+  padding:10px 5px;word-break:normal;}
+.tg th{border-style:solid;border-width:0px;font-family:Arial, sans-serif;font-size:14px;font-weight:normal;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-c3ow{border-color:inherit;text-align:center;vertical-align:top}
+.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
+.tg .tg-dvpl{border-color:inherit;text-align:right;vertical-align:top}
+</style>
+<table class="tg">
+<thead>
+  <tr>
+    <th class="tg-0pky">Cantidad de brechas</th>
+    <th class="tg-0pky">Frec. Abs. (días)</th>
+    <th class="tg-0pky"> $f_i$ </th>
+    <th class="tg-0pky"> $F_i$ </th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-0pky">Una brecha</td>
+    <td class="tg-dvpl">63</td>
+    <td class="tg-dvpl">0,8077</td>
+    <td class="tg-dvpl">0,8077</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">Dos brechas</td>
+    <td class="tg-dvpl">12</td>
+    <td class="tg-dvpl">0,1538</td>
+    <td class="tg-dvpl">0,9615</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">Tres brechas</td>
+    <td class="tg-dvpl">2</td>
+    <td class="tg-dvpl">0,0256</td>
+    <td class="tg-dvpl">0,9872</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">Cuatro brechas</td>
+    <td class="tg-dvpl">1</td>
+    <td class="tg-dvpl">0,0128</td>
+    <td class="tg-dvpl">1</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">Cinco brechas</td>
+    <td class="tg-dvpl">0</td>
+    <td class="tg-dvpl">0</td>
+    <td class="tg-dvpl">1</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">Seis brechas</td>
+    <td class="tg-dvpl">0</td>
+    <td class="tg-dvpl">0</td>
+    <td class="tg-dvpl">1</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">Total</td>
+    <td class="tg-dvpl">78</td>
+    <td class="tg-dvpl">1</td>
+    <td class="tg-c3ow">-</td>
+  </tr>
+</tbody>
+</table>
+<div style="text-align: center">
+Tabla 3: Distribución de brechas de tamaño 1
+<div/>
+
+---
+
+# Marco teórico
+
+## Generación de escenarios de simulación
+
+<style type="text/css">
+.tg  {border:none;border-collapse:collapse;border-spacing:0;}
+.tg td{border-style:solid;border-width:0px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;
+  padding:10px 5px;word-break:normal;}
+.tg th{border-style:solid;border-width:0px;font-family:Arial, sans-serif;font-size:14px;font-weight:normal;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-c3ow{border-color:inherit;text-align:center;vertical-align:top}
+.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
+.tg .tg-dvpl{border-color:inherit;text-align:right;vertical-align:top}
+</style>
+<table class="tg">
+<thead>
+  <tr>
+    <th class="tg-0pky">Cantidad de brechas</th>
+    <th class="tg-0pky">Frec. Absoluta(días)</th>
+    <th class="tg-0pky"> $f_i$ </th>
+    <th class="tg-0pky"> $F_i$ </th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-0pky">Una brecha</td>
+    <td class="tg-dvpl">12</td>
+    <td class="tg-dvpl">0,6667</td>
+    <td class="tg-dvpl">0,6667</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">Dos brechas</td>
+    <td class="tg-dvpl">4</td>
+    <td class="tg-dvpl">0,2222</td>
+    <td class="tg-dvpl">0,8889</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">Tres brechas</td>
+    <td class="tg-dvpl">2</td>
+    <td class="tg-dvpl">0,1111</td>
+    <td class="tg-dvpl">1</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">Total</td>
+    <td class="tg-dvpl">18</td>
+    <td class="tg-dvpl">1</td>
+    <td class="tg-c3ow">-</td>
+  </tr>
+</tbody>
+</table>
+<div style="text-align: center">
+Tabla 4: Distribución de brechas de tamaño 2
+<div/>
+
+<style type="text/css">
+.tg  {border:none;border-collapse:collapse;border-spacing:0;}
+.tg td{border-style:solid;border-width:0px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;
+  padding:10px 5px;word-break:normal;}
+.tg th{border-style:solid;border-width:0px;font-family:Arial, sans-serif;font-size:14px;font-weight:normal;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-c3ow{border-color:inherit;text-align:center;vertical-align:top}
+.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
+.tg .tg-dvpl{border-color:inherit;text-align:right;vertical-align:top}
+</style>
+<table class="tg">
+<thead>
+  <tr>
+    <th class="tg-0pky">Cantidad de brechas</th>
+    <th class="tg-0pky">Frec. Absoluta(días)</th>
+    <th class="tg-0pky"> $f_i$ </th>
+    <th class="tg-0pky"> $F_i$ </th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-0pky">Una brecha</td>
+    <td class="tg-dvpl">6</td>
+    <td class="tg-dvpl">0,8571</td>
+    <td class="tg-dvpl">0,8571</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">Dos brechas</td>
+    <td class="tg-dvpl">1</td>
+    <td class="tg-dvpl">0,1428</td>
+    <td class="tg-dvpl">1</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">Total</td>
+    <td class="tg-dvpl">7</td>
+    <td class="tg-dvpl">1</td>
+    <td class="tg-c3ow">-</td>
+  </tr>
+</tbody>
+</table>
+<div style="text-align: center">
+Tabla 5: Distribución de brechas de tamaño 3
+<div/>
+
+---
+
+# Marco teórico
+
+## Generación de escenarios de simulación
+
+<div style="font-size: 17px; text-align: justify">
+.pull-left[
+- **Paso 1**: A partir de la matriz de días completos se escoge al azar un porcentaje $T$ de estos. $T=\left \{ 20\%,40\%,60\%,80\%,100\% \right \}$.
+
+- **Paso 2:** Se toma el primer día elegido en el paso anterior y se genera un número de la distribución $U\sim (0,1)$ y según el valor obtenido este día tendrá cierto tipo de brecha. 
+
+- **Paso 3:** Teniendo el tipo de brecha, se procede a elegir la cantidad de brechas que se van a generar dentro del día, de nuevo haciendo uso de la distribución $U\sim(0,1)$.
+
+- **Paso 4:** Después de tener el tipo de brecha y su cantidad a generar en un día se eligen aleatoriamente las posiciones en las que estas se ubicaran.
+]
+
+
+.pull-right[
+
+- **Paso 5:** Se repiten los pasos 2, 3 y 4 para todos los días seleccionados en el paso 1.
+
+- **Paso 6:** Se realiza el proceso de imputación propuesto a la base de datos contaminada.
+
+- **Paso 7:** Teniendo la base de datos imputada, se procede a evaluar el método mediante el $R^2$ y el RMSE.
+
+]
+<div/>
+
+---
+
+# Marco teórico
+
+## Evaluación del método de imputación
+
+
+<div style="text-align: center;
+margin-top:100px">
+<div/>
+
+$$RMSE=\sqrt{\frac{1}{M}\sum_{i=1}^{M}\left ( P_i-O_i \right )^2}$$
+ 
+$$R^2=\left ( \frac{1}{M} \frac{\sum_{i=1}^{M}\left ( P_i-\bar{P} \right )\left ( O_i-\bar{O} \right )}{\sigma_P \sigma_O} \right )^2$$
+
+
+---
+
+# Resultados
+
+
+<div style="text-align: center;
+margin-top:100px">
+<div/>
+
+```{r  message=FALSE, warning=FALSE}
+basepm<-read_delim("C:/Users/Alejandro/Desktop/6.-univalle-2013-2018.csv", 
+                   ";", escape_double = FALSE, trim_ws = TRUE)
+
+a<-basepm %>%
+  select(-c("NO2  (ug/m3)" , "O3  (ug/m3)"  )) %>%
+  dplyr::rename(Fecha=`Fecha & Hora`, PM2.5=`PM2,5 (ug/m3)`) %>%
+  summarize(Fecha,hora=factor(str_sub(Fecha,-5,-1)),PM2.5=PM2.5) %>%
+  mutate(Fecha=as.Date(Fecha,format='%m/%d/%Y'),PM2.5=as.numeric(PM2.5)) %>%
+  filter(year(Fecha) =="2018") %>%
+  cast(Fecha~hora)
+
+
+
+pFAL<-a%>%
+  summarise(Diasem=weekdays(Fecha), 
+            Cantf= apply(a, 1, function(x){
+              sum(is.na(x))}),Cantc= apply(a, 1, function(x){
+                sum(!is.na(x))}))%>%
+  group_by(Diasem)%>%
+  summarise(CantDF=sum(Cantf),CantDC=sum(Cantc))%>%
+  as.data.frame()%>%
+  melt(id="Diasem")%>%
+  mutate(Indicador=factor(variable,levels = c("CantDC","CantDF"),
+                          labels=c("No faltante","Faltante")),
+         Diasem=factor(Diasem,
+                       levels=c("lunes","martes","miércoles","jueves","viernes",
+                                "sábado","domingo")))%>%
+  ggplot(aes(fill=Indicador, y=value, x=Diasem)) + 
+  geom_bar(position="fill", stat="identity")+
+  scale_fill_manual(values=c("grey","red"))
+
+
+ggpl<-ggplotly(pFAL)
+
+
+
+htmltools::div( ggpl, align="center" )  # Result is now an HTML object
+```
+
+<div style="text-align: center">
+Figura 1: sep $PM_{2_{\cdot }5}$
+<div/>
+
+
+---
+
+# Resultados
+
+<div style="text-align: center;
+margin-top:100px">
+<div/>
+
+```{r message=FALSE, warning=FALSE}
+
+
+dcomp<-a %>%
+  filter(apply(a, 1, function(x){sum(is.na(x))})==0)
+
+dinc<-a %>%
+  filter(apply(a, 1, function(x){sum(is.na(x))})>0)
+
+p<-dcomp %>%
+  melt(id="Fecha") %>%
+  ggplot(aes(y=value, x=substr(hora,1,2)))+
+  geom_boxplot(fill="lightgreen", alpha=0.8) + 
+  xlab("Horas")+
+  ylab("PM2.5")+
+  ggtitle("PM2.5")+
+  geom_hline(yintercept=25, linetype="dashed", color = "blue",size=0.5)+
+  geom_hline(yintercept=50, linetype="dashed", color = "red",size=0.5)
+
+pp<-ggplotly(p)
+
+htmltools::div( pp, align="center" )  # Result is now an HTML object
+```
+
+<div style="text-align: center">
+Figura 2: sep $PM_{2_{\cdot }5}$
+<div/>
+
+---
+
+# Resultados
+
+.pull-left[
+```{r  message=FALSE, warning=FALSE}
+
+
+p2<-dcomp %>%
+  filter(weekdays(Fecha)=="lunes") %>%
+  melt(id="Fecha") %>%
+  ggplot(aes(y=value, x=substr(hora,1,2)))+
+  geom_boxplot(fill="lightgreen", alpha=0.8) + 
+  xlab("Horas")+
+  ylab(" $PM_{2.5} (\\mu/m^3)$ ")+
+  ylim(0, 80)+  
+  theme(axis.text.x = element_text(size = rel(0.65)))+
+  ggtitle("Boxplots Lunes")
+
+
+
+pp2<-ggplotly(p2) %>%
+  config(mathjax = "cdn")
+
+
+htmlwidgets::saveWidget(pp2,file="plotlys.html",selfcontained=TRUE)
+
+htmltools::tags$iframe(
+  src = "plotlys.html",
+    frameBorder = "0",
+  width="100%", 
+  height="400"
+)
+```
+
+
+<p style="text-align: center">Figura 2: sep $PM_{2_{\cdot }5}$</p>
+
+]
+
+.pull-right[
+
+```{r  message=FALSE, warning=FALSE}
+
+
+p2<-dcomp %>%
+  filter(weekdays(Fecha)=="martes") %>%
+  melt(id="Fecha") %>%
+  ggplot(aes(y=value, x=substr(hora,1,2)))+
+  geom_boxplot(fill="lightgreen", alpha=0.8) + 
+  xlab("Horas")+
+  ylab(" $PM_{2.5} (\\mu/m^3)$ ")+
+  ylim(0, 80)+  
+  theme(axis.text.x = element_text(size = rel(0.65)))+
+  ggtitle("Boxplots Martes")
+
+
+pp2<-ggplotly(p2) %>%
+  config(mathjax = "cdn")
+
+
+htmlwidgets::saveWidget(pp2,file="plotlys1.html",selfcontained=TRUE)
+
+htmltools::tags$iframe(
+  src = "plotlys1.html",
+    frameBorder = "0",
+  width="100%", 
+  height="400"
+)
+```
+
+<p style="text-align: center">Figura 3: sep $PM_{2_{\cdot }5}$</p>
+
+
+
+]
+
+
+---
+
+# Resultados
+
+.pull-left[
+```{r fig.height=6, fig.width=6, message=FALSE, warning=FALSE}
+
+corplot<-dcomp%>%
+  filter(weekdays(Fecha)=="lunes")%>%
+  as.data.frame()%>%
+  dplyr::select(-Fecha)%>%
+  cor()%>%
+  ggcorrplot(colors = c("red","white","blue"), title = "Matriz de correlación día lunes")
+
+
+cp<-ggplotly(corplot)
+
+cp
+
+```
+
+
+<p style="text-align: center">Figura 2: sep $PM_{2_{\cdot }5}$</p>
+
+]
+
+.pull-right[
+
+```{r fig.height=6, fig.width=6, message=FALSE, warning=FALSE}
+
+corplot1<-dcomp%>%
+  filter(weekdays(Fecha)=="martes")%>%
+  as.data.frame()%>%
+  dplyr::select(-Fecha)%>%
+  cor()%>%
+  ggcorrplot(colors = c("red","white","blue"), title = "Matriz de correlación día martes")
+
+
+cp1<-ggplotly(corplot1)
+
+cp1
+
+
+```
+
+<p style="text-align: center">Figura 3: sep $PM_{2_{\cdot }5}$</p>
+
+
+
+]
+
+
+---
+
+# Resultados
+
+<div style="margin-bottom:100px;">
+</div>
+
+<style type="text/css">
+.tg  {border:none;border-collapse:collapse;border-spacing:0;}
+.tg td{border-style:solid;border-width:0px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;
+  padding:10px 5px;word-break:normal;}
+.tg th{border-style:solid;border-width:0px;font-family:Arial, sans-serif;font-size:14px;font-weight:normal;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
+</style>
+<table class="tg">
+<thead>
+  <tr>
+    <th class="tg-0pky">Día</th>
+    <th class="tg-0pky"> $k(\hat{\Sigma})$ </th>
+    <th class="tg-0pky"> $k(\hat{\Sigma}^*)$ </th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-0pky"> **Lun** </td>
+    <td class="tg-0pky">1716.39</td>
+    <td class="tg-0pky">40.30</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky"> **Mar** </td>
+    <td class="tg-0pky">347.32</td>
+    <td class="tg-0pky">36.24</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky"> **Mié** </td>
+    <td class="tg-0pky">597.80</td>
+    <td class="tg-0pky">50.27</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky"> **Jue** </td>
+    <td class="tg-0pky">2104.46</td>
+    <td class="tg-0pky">41.50</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky"> **Vie** </td>
+    <td class="tg-0pky">574.74</td>
+    <td class="tg-0pky">37.40</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky"> **Sáb** </td>
+    <td class="tg-0pky">864.68</td>
+    <td class="tg-0pky">37.13</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky"> **Dom** </td>
+    <td class="tg-0pky">1211.02</td>
+    <td class="tg-0pky">45.71</td>
+  </tr>
+</tbody>
+</table>
+<div style="text-align: center">
+Tabla 6: Número de condición para matrices de covarianza de MV y Shrinkage
+<div/>
+
