@@ -6,8 +6,7 @@ author: "Esteban Arroyave - Alejandro Villarreal"
 date: "`r Sys.Date()`"
 output: 
   xaringan::moon_reader:
-    css: [default, metropolis, metropolis-fonts]
-  
+    css: [default, metropolis, metropolis-fonts,"style4.css"]
 
 ---
 
@@ -30,7 +29,10 @@ class: center, middle
   MathJax.Hub.Config({ TeX: { equationNumbers: {autoNumber: "all"} } });
 </script>
 
+
+
 ---
+
 #Resumen
 
 <div style="text-align: justify;
@@ -44,23 +46,104 @@ Se propone un método de imputación de datos faltantes del contaminante $PM_{2.
 
 
 ---
+
 #Planteamiento del problema
 
+<div style="text-align: justify;
+margin-top:100px">
+
+
+- La recolección de información de los contaminantes se ve afectada por diversos motivos que generan espacios en blanco o faltas en las bases de datos que pueden afectar en las propiedades de los indicadores.
+
+- En un estudio previo (OteroP) reportan que las mediciones por hora $i\,\,\, (i=1,...,24)$ del día $j\,\,\, (j=1,...,7)$ se distribuyen normal. además que pueden existir distribuciones normales bivariadas entre cada hora $(i\,\,\, e\,\,\, i')$.
+
+- Ahora bien, en un escenario ideal el proceso generador del $PM_{2 . 5}$ en un día $j$ se distribuye normal multivariado. Así, se tendrán 7 normales 24-variadas.
+
+- El reto consiste en estimar los parámetros asociados a estas distribuciones, siendo necesario probar el supuesto de normalidad multivariada y evaluar las propiedades de estas estimaciones mediante herramientas estadísticas.
+
+
+<div/>
 
 
 ---
+
 #Justificación
 
+<div style="text-align: justify">
+
+## Estadística
+Aportar a partir de la imputación estadística a mejorar las estimaciones para indicadores de la calidad del aire conservando la calidad de la información.
+
+Para aportar en el desarrollo de métodologías de imputación a partir de la normal multivariada en bases de datos de contaminación ambiental,  cambiando la perspectiva de datos funcionales.
+
+## Contextual
+
+
+La evidencia entre la relación de las concentraciones de $PM_{2_{\cdot }5}$ y $PM_{10}$ en el aire con enfermedades de tipo respiratorio y cardiovascular aumentando la morbilidad de los seres humanos, en especial en las grandes ciudades (OMS).
+
+Importancia que la información de la calidad del aire sea precisa para generar indicadores confiables que permitan impulsar acciones.
+
+<div/>
 
 
 ---
 #Objetivos
 
+<div style="text-align: justify">
 
+
+## Objetivo general
+
+Proponer un método de imputación para los datos faltantes de $PM_{2_{\cdot }5}$, basado en una distribución normal multivariada.  
+
+##Objetivos especificos
+
+- Verificar si los datos de $PM_{2_{\cdot }5}$ para cada día se distribuye como una normal multivariada.
+
+- Estimar las matrices de varianzas y covarianzas de los datos de $PM_{2_{\cdot }5}$ para para cada día j $(j=1,...,7)$ con el fin proponer la distribución de cada día como una Normal 24-variada.
+
+- Escoger entre los evaluados, el método que mejor se ajuste para imputar los datos faltantes de $PM_{2_{\cdot }5}$ a partir de cada normal multivariada.
+
+- Evaluar vía simulación la precisión del método de imputación propuesto.
+
+<div/>
 
 
 ---
 #Antecedentes
+
+<br>
+
+<div class="wrap-collabsible">
+<input id="collapsible10" class="toggle" type="checkbox"><label for="collapsible10" class="lbl-toggle">
+Antecedente 1(2020)
+<br>
+</label>
+<div class="collapsible-content">
+<div class="content-inner">
+<p class="text">
+texto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumen
+
+</div>
+</div>
+</div>
+
+<br>
+
+<div class="wrap-collabsible">
+<input id="collapsible11" class="toggle" type="checkbox"><label for="collapsible11" class="lbl-toggle">
+Antecedente 2(2020)
+<br>
+</label>
+<div class="collapsible-content">
+<div class="content-inner">
+<p class="text">
+texto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumen
+
+</div>
+</div>
+</div>
+
 
 
 
@@ -130,7 +213,7 @@ Se afirma que el tamaño del material partículado está inversamente relacionad
 </table>
 </center>
 <div style="text-align: center">
-Tabla 1: Nivel máximo de exposición permisible del contaminante $PM_{2_{\cdot }5}$
+**Tabla 1**: Nivel máximo de exposición permisible del contaminante $PM_{2_{\cdot }5}$
 <div/>
 
 <div style="text-align: justify">
@@ -161,6 +244,7 @@ La probabilidad de que $M$ tome el valor de $m=(m_1,...,m_n)$ dado que $Y$ toma 
 <div/>
 
 $$g_\phi(m|y) = g_\phi(m|(y_{(0)},y_{(1)}))$$
+<div/>
 
 
 ---
@@ -201,6 +285,17 @@ Así pues, la probabilidad de que falten datos en $Y$ depende tanto de los valor
 <div/>
 
 
+---
+
+# Marco teórico
+
+## Test de Little para probar MCAR
+
+- Se define $a=1,...,A$ donde $a$ es un patrón de faltas en $X= (X_1,...,X_i,...,X_p)$ con $X \sim NMV$.
+
+- Al tener varias obsevaciones de $X$, se define $\mathbf{X_a}$ como la matriz de vectores con el patrón de falta $a$ que cuenta con $r_a$ filas, cumpliendose que $\sum_a r_a= n$.
+
+- Por último $D_a$ de dimensión $p * p_a$ (con $p_a$ el número de variables observadas en el patrón $a$), es una matriz indicadora de las variables que fueron observadas en el patrón a, que tiene una columna para cada variable presente que consta de p-1 ceros y 1 uno.
 
 
 ---
@@ -208,6 +303,15 @@ Así pues, la probabilidad de que falten datos en $Y$ depende tanto de los valor
 # Marco teórico
 
 ## Test de Little para probar MCAR
+
+$$H_0:(x_{(1),k} | m_a )\sim N(\mu_{(1),a},\Sigma_{(1),a})\,\,\,\,VS\,\,\,\,   
+ H_a: (x_{(1),k} | m_a )\sim N(v_{(1),a},\Sigma_{(1),a})$$
+ 
+ Con,
+
+$$d_0^2 = \sum_{a=1}^\mathbf{A} r_a (\bar{x}_{(1),a} - \mu_{(1),a})\Sigma_{(1),a}^{-1}(\bar{x}_{(1),a} - \mu_{(1),a})^T \sim \chi^2_{(\sum p_a - p)}$$
+ 
+Con $\bar{x}_{(1),a}= r_a^-1$ $\sum_{k \in \mathbf{X_a}} x_{(1),k}$ siendo $x_{(1,k)}$ el vector de valores observados para una día k cualquiera en $\mathbf{X_a}$, $\hat{\mu}_{(1)a}=\tilde{\mu}D_{a}$  y $\hat{\Sigma}_{(1),a} = D_a^T \tilde{\Sigma} D_a$, medias y matrices de covarianzas de las variables observadas en el patrón a. Así pues, (6) se distribuye $\chi^2$ con $\sum_a p_a - p$ grados de libertad.
 
 ---
 
@@ -466,7 +570,7 @@ Figura 2: sep $PM_{2_{\cdot }5}$
 </tbody>
 </table>
 <div style="text-align: center">
-Tabla 2: Distribución de días de acuerdo al tipo de brecha de faltantes
+**Tabla 2**: Distribución de días de acuerdo al tipo de brecha de faltantes
 <div/>
 
 ---
@@ -540,7 +644,7 @@ Tabla 2: Distribución de días de acuerdo al tipo de brecha de faltantes
 </tbody>
 </table>
 <div style="text-align: center">
-Tabla 3: Distribución de brechas de tamaño 1
+**Tabla 3**: Distribución de brechas de tamaño 1
 <div/>
 
 ---
@@ -596,7 +700,7 @@ Tabla 3: Distribución de brechas de tamaño 1
 </tbody>
 </table>
 <div style="text-align: center">
-Tabla 4: Distribución de brechas de tamaño 2
+**Tabla 4**: Distribución de brechas de tamaño 2
 <div/>
 
 <style type="text/css">
@@ -640,7 +744,7 @@ Tabla 4: Distribución de brechas de tamaño 2
 </tbody>
 </table>
 <div style="text-align: center">
-Tabla 5: Distribución de brechas de tamaño 3
+**Tabla 5**: Distribución de brechas de tamaño 3
 <div/>
 
 ---
@@ -701,10 +805,11 @@ margin-top:100px">
 basepm<-read_delim("C:/Users/Alejandro/Desktop/6.-univalle-2013-2018.csv", 
                    ";", escape_double = FALSE, trim_ws = TRUE)
 
+
 a<-basepm %>%
-  select(-c("NO2  (ug/m3)" , "O3  (ug/m3)"  )) %>%
+  dplyr::select(-c("NO2  (ug/m3)" , "O3  (ug/m3)"  )) %>%
   dplyr::rename(Fecha=`Fecha & Hora`, PM2.5=`PM2,5 (ug/m3)`) %>%
-  summarize(Fecha,hora=factor(str_sub(Fecha,-5,-1)),PM2.5=PM2.5) %>%
+  summarize(Fecha,hora=as.factor(as.numeric(str_sub(Fecha,-5,-4))+1),PM2.5=PM2.5) %>%
   mutate(Fecha=as.Date(Fecha,format='%m/%d/%Y'),PM2.5=as.numeric(PM2.5)) %>%
   filter(year(Fecha) =="2018") %>%
   cast(Fecha~hora)
@@ -738,7 +843,7 @@ htmltools::div( ggpl, align="center" )  # Result is now an HTML object
 ```
 
 <div style="text-align: center">
-Figura 1: sep $PM_{2_{\cdot }5}$
+**Figura 1**: Proporción de datos faltantes por día de la semana
 <div/>
 
 
@@ -761,7 +866,7 @@ dinc<-a %>%
 
 p<-dcomp %>%
   melt(id="Fecha") %>%
-  ggplot(aes(y=value, x=substr(hora,1,2)))+
+  ggplot(aes(y=value, x=hora))+
   geom_boxplot(fill="lightgreen", alpha=0.8) + 
   xlab("Horas")+
   ylab("PM2.5")+
@@ -775,7 +880,7 @@ htmltools::div( pp, align="center" )  # Result is now an HTML object
 ```
 
 <div style="text-align: center">
-Figura 2: sep $PM_{2_{\cdot }5}$
+**Figura 2**: Gráfico de caja de $PM_{2_{\cdot }5}$ por hora.
 <div/>
 
 ---
@@ -789,7 +894,7 @@ Figura 2: sep $PM_{2_{\cdot }5}$
 p2<-dcomp %>%
   filter(weekdays(Fecha)=="lunes") %>%
   melt(id="Fecha") %>%
-  ggplot(aes(y=value, x=substr(hora,1,2)))+
+  ggplot(aes(y=value, x=hora))+
   geom_boxplot(fill="lightgreen", alpha=0.8) + 
   xlab("Horas")+
   ylab(" $PM_{2.5} (\\mu/m^3)$ ")+
@@ -814,7 +919,7 @@ htmltools::tags$iframe(
 ```
 
 
-<p style="text-align: center">Figura 2: sep $PM_{2_{\cdot }5}$</p>
+<p style="text-align: center"> <strong>Figura 3</strong>: Gráfico de caja día lunes</p>
 
 ]
 
@@ -826,7 +931,7 @@ htmltools::tags$iframe(
 p2<-dcomp %>%
   filter(weekdays(Fecha)=="martes") %>%
   melt(id="Fecha") %>%
-  ggplot(aes(y=value, x=substr(hora,1,2)))+
+  ggplot(aes(y=value, x=hora))+
   geom_boxplot(fill="lightgreen", alpha=0.8) + 
   xlab("Horas")+
   ylab(" $PM_{2.5} (\\mu/m^3)$ ")+
@@ -849,7 +954,7 @@ htmltools::tags$iframe(
 )
 ```
 
-<p style="text-align: center">Figura 3: sep $PM_{2_{\cdot }5}$</p>
+<p style="text-align: center"> <strong>Figura 4</strong>: Gráfico de caja día martes</p>
 
 
 
@@ -870,15 +975,20 @@ corplot<-dcomp%>%
   cor()%>%
   ggcorrplot(colors = c("red","white","blue"), title = "Matriz de correlación día lunes")
 
+corplot$data$Var1<-as.factor(corplot$data$Var1)
+
+corplot$data$Var2<-as.factor(corplot$data$Var2)
 
 cp<-ggplotly(corplot)
-
+cp$x$layout$xaxis$tickfont$size<-13
+cp$x$layout$yaxis$tickfont$size<-13
+cp$x$layout$xaxis$tickangle<--90
 cp
 
 ```
 
 
-<p style="text-align: center">Figura 2: sep $PM_{2_{\cdot }5}$</p>
+<p style="text-align: center"> <strong>Figura 5</strong>: Matriz de correlación día lunes</p>
 
 ]
 
@@ -893,15 +1003,22 @@ corplot1<-dcomp%>%
   cor()%>%
   ggcorrplot(colors = c("red","white","blue"), title = "Matriz de correlación día martes")
 
+corplot1$data$Var1<-as.factor(corplot1$data$Var1)
+
+corplot1$data$Var2<-as.factor(corplot1$data$Var2)
 
 cp1<-ggplotly(corplot1)
+cp1$x$layout$xaxis$tickfont$size<-13
+cp1$x$layout$yaxis$tickfont$size<-13
+cp1$x$layout$xaxis$tickangle<--90
+
 
 cp1
 
 
 ```
 
-<p style="text-align: center">Figura 3: sep $PM_{2_{\cdot }5}$</p>
+<p style="text-align: center"> <strong>Figura 6</strong>: Matriz de correlación día martes</p>
 
 
 
@@ -912,8 +1029,7 @@ cp1
 
 # Resultados
 
-<div style="margin-bottom:100px;">
-</div>
+## Estimación Shrinkage
 
 <style type="text/css">
 .tg  {border:none;border-collapse:collapse;border-spacing:0;}
@@ -970,6 +1086,320 @@ cp1
 </tbody>
 </table>
 <div style="text-align: center">
-Tabla 6: Número de condición para matrices de covarianza de MV y Shrinkage
+**Tabla 6**: Número de condición para matrices de covarianza de MV y Shrinkage
 <div/>
 
+---
+
+# Resultados
+
+## Prueba de normalidad multivariada
+
+<style type="text/css">
+  .tg  {border:none;border-collapse:collapse;border-spacing:0;}
+.tg td{border-style:solid;border-width:0px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;
+  padding:10px 5px;word-break:normal;}
+.tg th{border-style:solid;border-width:0px;font-family:Arial, sans-serif;font-size:14px;font-weight:normal;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
+</style>
+  <table class="tg">
+  <thead>
+  <tr>
+  <th class="tg-0pky"></th>
+  <th class="tg-0pky" colspan="2">Simetría</th>
+  <th class="tg-0pky" colspan="2">Curtosis</th>
+  <th class="tg-0pky"></th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+  <td class="tg-0pky">**Dia/Test**</td>
+  <td class="tg-0pky">**Est.**</td>
+  <td class="tg-0pky">**P-valor**</td>
+  <td class="tg-0pky">**Est.**</td>
+  <td class="tg-0pky">**P-valor**</td>
+  <td class="tg-0pky">Cumplimiento</td>
+  </tr>
+  <tr>
+  <td class="tg-0pky">**Lun**</td>
+  <td class="tg-0pky">2331.20</td>
+  <td class="tg-0pky">0.99</td>
+  <td class="tg-0pky">-3.335</td>
+  <td class="tg-0pky">0.00</td>
+  <td class="tg-0pky">SI/NO</td>
+  </tr>
+  <tr>
+  <td class="tg-0pky">**Mar**</td>
+  <td class="tg-0pky">2559.89</td>
+  <td class="tg-0pky">0.70</td>
+  <td class="tg-0pky">-1.69</td>
+  <td class="tg-0pky">0.089</td>
+  <td class="tg-0pky">SI/SI</td>
+  </tr>
+  <tr>
+  <td class="tg-0pky">**Mie**</td>
+  <td class="tg-0pky">2477.60</td>
+  <td class="tg-0pky">0.95</td>
+  <td class="tg-0pky">-2.32</td>
+  <td class="tg-0pky">0.02</td>
+  <td class="tg-0pky">SI/NO</td>
+  </tr>
+  <tr>
+  <td class="tg-0pky">**Jue**</td>
+  <td class="tg-0pky">2329.22</td>
+  <td class="tg-0pky">0.99</td>
+  <td class="tg-0pky">-3.24</td>
+  <td class="tg-0pky">0.001</td>
+  <td class="tg-0pky">SI/NO</td>
+  </tr>
+  <tr>
+  <td class="tg-0pky">**Vie**</td>
+  <td class="tg-0pky">2464.42</td>
+  <td class="tg-0pky">0.97</td>
+  <td class="tg-0pky">-2.32</td>
+  <td class="tg-0pky">0.019</td>
+  <td class="tg-0pky">SI/NO</td>
+  </tr>
+  <tr>
+  <td class="tg-0pky">**Sab**</td>
+  <td class="tg-0pky">2616.78</td>
+  <td class="tg-0pky">0.40</td>
+  <td class="tg-0pky">-1.27</td>
+  <td class="tg-0pky">0.20</td>
+  <td class="tg-0pky">SI/SI</td>
+  </tr>
+  <tr>
+  <td class="tg-0pky">**Dom**</td>
+  <td class="tg-0pky">2466.60</td>
+  <td class="tg-0pky">0.96</td>
+  <td class="tg-0pky">-2.43</td>
+  <td class="tg-0pky">0.014</td>
+  <td class="tg-0pky">SI/NO</td>
+  </tr>
+  </tbody>
+  </table>
+<div style="text-align: center">
+**Tabla 7**: Resultados del test de Mardia
+<div/>
+  
+  
+---
+
+# Resultados
+
+## Prueba de MCAR
+
+
+<style type="text/css">
+.tg  {border:none;border-collapse:collapse;border-spacing:0;}
+.tg td{border-style:solid;border-width:0px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;
+  padding:10px 5px;word-break:normal;}
+.tg th{border-style:solid;border-width:0px;font-family:Arial, sans-serif;font-size:14px;font-weight:normal;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
+</style>
+<table class="tg">
+<thead>
+  <tr>
+    <th class="tg-0pky">Día</th>
+    <th class="tg-0pky">GL</th>
+    <th class="tg-0pky">Estadístico</th>
+    <th class="tg-0pky">Valor-P</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-0pky">**Lun**</td>
+    <td class="tg-0pky">323</td>
+    <td class="tg-0pky">357.26</td>
+    <td class="tg-0pky">0.091</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">**Mar**</td>
+    <td class="tg-0pky">219</td>
+    <td class="tg-0pky">249.77</td>
+    <td class="tg-0pky">0.075</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">**Mié**</td>
+    <td class="tg-0pky">198</td>
+    <td class="tg-0pky">231.7</td>
+    <td class="tg-0pky">0.051</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">**Jue**</td>
+    <td class="tg-0pky">284</td>
+    <td class="tg-0pky">302.14</td>
+    <td class="tg-0pky">0.219</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">**Vie**</td>
+    <td class="tg-0pky">263</td>
+    <td class="tg-0pky">324.59</td>
+    <td class="tg-0pky">0.001</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">**Sáb**</td>
+    <td class="tg-0pky">153</td>
+    <td class="tg-0pky">194.31</td>
+    <td class="tg-0pky">0.013</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">**Dom**</td>
+    <td class="tg-0pky">179</td>
+    <td class="tg-0pky">182.38</td>
+    <td class="tg-0pky">0.416</td>
+  </tr>
+</tbody>
+</table>
+<div style="text-align: center">
+**Tabla 8**: Resultados del test de Little
+<div/>
+  
+  
+---
+
+# Resultados
+
+## Desempeño del método de imputación
+
+<style type="text/css">
+.tg  {border:none;border-collapse:collapse;border-spacing:0;}
+.tg td{border-style:solid;border-width:0px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;
+  padding:10px 5px;word-break:normal;}
+.tg th{border-style:solid;border-width:0px;font-family:Arial, sans-serif;font-size:14px;font-weight:normal;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-c3ow{border-color:inherit;text-align:center;vertical-align:top}
+.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
+</style>
+<table class="tg">
+<thead>
+  <tr>
+    <th class="tg-c3ow"> % Días falt.</th>
+    <th class="tg-c3ow"> $\hat{p}$ (min - max)</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-0pky">20%</td>
+    <td class="tg-0pky">0.016 (0.011,0.022)</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">40%</td>
+    <td class="tg-0pky">0.033 (0.024, 0.041)</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">60%</td>
+    <td class="tg-0pky">0.049 (0.041, 0.061)</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">80%</td>
+    <td class="tg-0pky">0.066 (0.051, 0.078)</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">100%</td>
+    <td class="tg-0pky">0.083 (0.071, 0.097)</td>
+  </tr>
+</tbody>
+</table>
+<div style="text-align: center">
+**Tabla 9**: Proporción de datos faltantes dado el porcentaje de días contaminados en la matriz.
+<div/>
+
+---
+# Resultados
+
+## Desempeño del método de imputación
+
+
+<style type="text/css">
+.tg  {border:none;border-collapse:collapse;border-spacing:0;}
+.tg td{border-style:solid;border-width:0px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;
+  padding:10px 5px;word-break:normal;}
+.tg th{border-style:solid;border-width:0px;font-family:Arial, sans-serif;font-size:14px;font-weight:normal;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-c3ow{border-color:inherit;text-align:center;vertical-align:top}
+</style>
+<table class="tg">
+<thead>
+  <tr>
+    <th class="tg-c3ow">% Días falt.</th>
+    <th class="tg-c3ow">Matriz</th>
+    <th class="tg-c3ow">RMSE</th>
+    <th class="tg-c3ow">R2</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-c3ow" rowspan="2">20%</td>
+    <td class="tg-c3ow"> $\hat{\Sigma}$ </d>
+    <td class="tg-c3ow">5.682 (3.91, 8.194)</td>
+    <td class="tg-c3ow">0.698 (0.352, 0.875)</td>
+  </tr>
+  <tr>
+    <td class="tg-c3ow"> $\hat{\Sigma }^*$ </td>
+    <td class="tg-c3ow">8.391 (6.224, 10.281)</td>
+    <td class="tg-c3ow">0.434 (0.164, 0.635)</td>
+  </tr>
+  <tr>
+    <td class="tg-c3ow" rowspan="2">40%</td>
+    <td class="tg-c3ow"> $\hat{\Sigma}$ </td>
+    <td class="tg-c3ow">5.698 (4.374, 7.487)</td>
+    <td class="tg-c3ow">0.698 (0.464, 0.829)</td>
+  </tr>
+  <tr>
+    <td class="tg-c3ow"> $\hat{\Sigma }^*$ </td>
+    <td class="tg-c3ow">8.565 (7.201, 10.075)</td>
+    <td class="tg-c3ow">0.411 (0.217, 0.596)</td>
+  </tr>
+  <tr>
+    <td class="tg-c3ow" rowspan="2">60%</td>
+    <td class="tg-c3ow"> $\hat{\Sigma}$ </td>
+    <td class="tg-c3ow">5.732 (4.479, 7.086)</td>
+    <td class="tg-c3ow">0.699 (0.554, 0.808)</td>
+  </tr>
+  <tr>
+    <td class="tg-c3ow"> $\hat{\Sigma }^*$ </td>
+    <td class="tg-c3ow">8.597 (7.407, 9.985)</td>
+    <td class="tg-c3ow">0.41 (0.282, 0.568)</td>
+  </tr>
+  <tr>
+    <td class="tg-c3ow" rowspan="2">80%</td>
+    <td class="tg-c3ow"> $\hat{\Sigma}$ </td>
+    <td class="tg-c3ow">5.707 (4.618, 6.799)</td>
+    <td class="tg-c3ow">0.7 (0.578, 0.804)</td>
+  </tr>
+  <tr>
+    <td class="tg-c3ow"> $\hat{\Sigma }^*$ </td>
+    <td class="tg-c3ow">8.536 (7.51, 9.32)</td>
+    <td class="tg-c3ow">0.417 (0.325, 0.526)</td>
+  </tr>
+  <tr>
+    <td class="tg-c3ow" rowspan="2">100%</td>
+    <td class="tg-c3ow"> $\hat{\Sigma}$ </td>
+    <td class="tg-c3ow">5.718 (4.761, 6.673)</td>
+    <td class="tg-c3ow">0.7 (0.581, 0.795)</td>
+  </tr>
+  <tr>
+    <td class="tg-c3ow"> $\hat{\Sigma }^*$ </td>
+    <td class="tg-c3ow">8.556 (7.523, 9.996)</td>
+    <td class="tg-c3ow">0.411 (0.281, 0.507)</td>
+  </tr>
+</tbody>
+</table>
+<div style="text-align: center">
+**Tabla 10**: Desempeño del método de imputación propuesto.
+<div/>
+
+---
+# Aplicación de la imputación
+
+
+```{r}
+htmltools::tags$iframe(
+  src = "https://alejandrovillarreal.shinyapps.io/tesis",
+    frameBorder = "1",
+  width="800", 
+  height="550"
+)

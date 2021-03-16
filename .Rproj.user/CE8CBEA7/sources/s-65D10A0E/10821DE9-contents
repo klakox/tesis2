@@ -1,0 +1,48 @@
+---
+title: "Propuesta de un método de imputación basado en la distribución Normal multivariada para los registros de $PM_{2.5}$ en la ciudad de Cali"
+
+subtitle: "⚔<br/>with xaringan"
+author: "Esteban Arroyave - Alejandro Villarreal"
+date: "`r Sys.Date()`"
+output: 
+  xaringan::moon_reader:
+    css: [default, metropolis, metropolis-fonts,"style4.css"]
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(tidyverse)
+library(lubridate)
+library(reshape)
+library(plotly)
+library(ggcorrplot)
+
+
+```
+
+class: center, middle
+### /ʃæ.'riŋ.ɡæn/
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({ TeX: { equationNumbers: {autoNumber: "all"} } });
+</script>
+
+
+
+---
+
+#Resumen
+
+<!-- <iframe src=https://alejandrovillarreal.shinyapps.io/GPajus/></iframe> -->
+```{r}
+htmltools::tags$iframe(
+  src = "https://alejandrovillarreal.shinyapps.io/GPajus",
+    frameBorder = "1",
+  width="800", 
+  height="550"
+)
+
+```
+

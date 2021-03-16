@@ -1,0 +1,256 @@
+library(tidyverse)
+library(lubridate)
+library(reshape)
+
+library(nortest)
+library(xtable)
+library(readr)
+library(Amelia)
+library(MVN)
+# library(fda)
+# library(fda.usc)
+library(corrplot)
+library(RColorBrewer)
+library(lattice)
+library(plotly)
+library(MASS)
+library(condMVNorm)
+library(norm)
+library(corpcor)
+library(plotly)
+
+basepm<-read_delim("https://raw.githubusercontent.com/klakox/villarreal-ale/main/6.-univalle-2013-2018.csv", 
+                   ";", escape_double = FALSE, trim_ws = TRUE)
+
+basepm %>%
+  dplyr::select(-c("NO2  (ug/m3)" , "O3  (ug/m3)"  )) %>%
+  dplyr::rename(Fecha=`Fecha & Hora`, PM2.5=`PM2,5 (ug/m3)`) %>%
+  summarize(Fecha,variable=factor(str_sub(Fecha,-5,-1)),value=PM2.5) %>%
+  mutate(Fecha=as.Date(Fecha,format='%m/%d/%Y'),value=as.numeric(value)) %>%
+  filter(year(Fecha) =="2018")%>%
+  cast()
+  
+
+
+
+a<-basepm %>%
+  dplyr::select(-c("NO2  (ug/m3)" , "O3  (ug/m3)"  )) %>%
+  dplyr::rename(Fecha=`Fecha & Hora`, PM2.5=`PM2,5 (ug/m3)`) %>%
+  summarize(Fecha,hora=as.factor(as.numeric(str_sub(Fecha,-5,-4))+1),PM2.5=PM2.5) %>%
+  mutate(Fecha=as.Date(Fecha,format='%m/%d/%Y'),PM2.5=as.numeric(PM2.5)) %>%
+  filter(year(Fecha) =="2018") %>%
+  cast(Fecha~hora)
+
+
+b<-melt(na.omit(a),id="Fecha")
+
+ggplot(b)+
+  geom_boxplot(aes(y=value, x=hora))
+
+
+sum(is.na(a))
+
+apply(a, 1, function(x){sum(is.na(x))})
+
+### Grafico de faltantes ----
+
+
+x11()
+missmap(a[,-1],rank.order = F,y.labels =  c(365:1),main="Mapa de datos faltantes")
+
+
+### Días completos ----
+
+dcomp<-a %>%
+  filter(apply(a, 1, function(x){sum(is.na(x))})==0)
+
+nrow(dcomp)
+
+### Días incompletos
+
+dinc<-a %>%
+  filter(apply(a, 1, function(x){sum(is.na(x))})>0)
+
+
+p<-dcomp %>%
+  melt(id="Fecha") %>%
+  ggplot(aes(y=value, x=hora))+
+  geom_boxplot(fill="lightgreen", alpha=0.8) + 
+  xlab("Horas")+
+  ylab("PM2.5")+
+  geom_hline(yintercept=25, linetype="dashed", color = "blue",size=0.5)+
+  geom_hline(yintercept=50, linetype="dashed", color = "red",size=0.5)
+ggplotly(p)
+
+### Boxplot por días de la semana ----
+
+library(gridExtra)
+
+p<-dcomp %>%
+  filter(weekdays(Fecha)=="lunes") %>%
+  melt(id="Fecha") %>%
+  ggplot(aes(y=value, x=substr(hora,1,2)))+
+  geom_boxplot(fill="lightgreen", alpha=0.8) + 
+  xlab("Horas")+
+  ylab(TeX("PM_{2.5} (\\mu/m^3)"))+
+  ylim(0, 80) +  
+  theme(axis.text.x = element_text(size = rel(0.5)))
+
+pp<-ggplotly(p) %>%
+  config(mathjax = "cdn")
+
+htmltools::tags
+
+p2<-dcomp %>%  filter(weekdays(Fecha)=="martes") %>%
+  melt(id="Fecha") %>%
+  ggplot(aes(y=value, x=substr(hora,1,2)))+
+  geom_boxplot(fill="lightgreen", alpha=0.8) + 
+  xlab("Horas")+
+  ylab("PM2.5")+
+  ylim(0, 80)
+  
+
+basefrec<-
+a%>%
+summarise(Diasem=weekdays(Fecha), 
+          Indfalt= apply(a, 1, function(x){
+            if(sum(is.na(x))>0){return("Faltante")}else{return("Completo")}}))%>%
+      group_by(Diasem, Indfalt)%>%
+        summarise(frec=n()) %>%
+  mutate(Diasem=factor(Diasem,
+                       levels=c("lunes","martes","miércoles","jueves","viernes",
+                                "sábado","domingo")))
+
+
+pFAL<-a%>%
+  summarise(Diasem=weekdays(Fecha), 
+            Cantf= apply(a, 1, function(x){
+              sum(is.na(x))}),Cantc= apply(a, 1, function(x){
+                sum(!is.na(x))}))%>%
+  group_by(Diasem)%>%
+  summarise(CantDF=sum(Cantf),CantDC=sum(Cantc))%>%
+  as.data.frame()%>%
+  melt(id="Diasem")%>%
+  mutate(Indicador=factor(variable,levels = c("CantDC","CantDF"),
+                          labels=c("No faltante","Faltante")),
+         Diasem=factor(Diasem,
+                       levels=c("lunes","martes","miércoles","jueves","viernes",
+                                "sábado","domingo")))%>%
+  ggplot(aes(fill=Indicador, y=value, x=Diasem)) + 
+  geom_bar(position="fill", stat="identity")+
+  scale_fill_manual(values=c("grey","red"))
+
+
+ggplotly(pFAL)
+
+
+
+library(viridis)
+library(hrbrthemes)
+
+ggplot(basefrec, aes(fill=Indfalt, y=frec, x=Diasem)) + 
+  geom_bar(position="fill", stat="identity") +
+  scale_fill_viridis(discrete = T) +
+  ggtitle("Studying 4 species..") +
+  theme_ipsum() +
+  xlab("")
+  
+
+dinc1_6<-dinc %>%
+  filter(apply(as.data.frame( dinc), 1, function(x){sum(is.na(x))})<=6)
+
+library(ggcorrplot)
+
+corplot<-dcomp%>%
+  filter(weekdays(Fecha)=="lunes")%>%
+  as.data.frame()%>%
+  dplyr::select(-Fecha)%>%
+  cor()%>%
+  ggcorrplot(colors = c("red","white","blue"), title = "Matriz de correlación día lunes"
+             )
+
+corplot$data$Var1<-as.factor(corplot$data$Var1)
+
+corplot$data$Var2<-as.factor(corplot$data$Var2)
+
+a<-ggplotly(corplot)
+a$x$layout$xaxis$tickfont$size<-13
+a$x$layout$yaxis$tickfont$size<-13
+
+a$x$layout$xaxis$tickangle<--90
+
+
+
+
+a$x$layout$xaxis$tickangle<--90
+
+
+
+x11()
+dcomp %>%
+  filter(weekdays(Fecha)=="lunes") %>%
+  melt(id="Fecha") %>%
+  filter(hora=="1")%>%
+  ggplot(aes(y=value))+
+           geom_density()
+
+
+
+  x11()
+dcomp %>%
+  filter(weekdays(Fecha)=="lunes") %>%
+  melt(id="Fecha") %>%
+  filter(hora=="1" | hora=="2")%>%
+  ggplot(aes(y=value,x=hora))+
+  geom_violin()
+
+
+
+
+dcomp %>%
+  filter(weekdays(Fecha)=="miércoles") %>%
+  dplyr::select("1","2")%>%
+  rename(hora1="1",hora2="2")%>%
+  ggplot(aes(x = hora1, y = hora2)) +
+  geom_point(alpha = .5) +
+  geom_density_2d()
+
+library(MASS)
+
+pru<-dcomp %>%
+  filter(weekdays(Fecha)=="miércoles") %>%
+  dplyr::select("1","2")%>%
+  rename(hora1="1",hora2="2")
+  
+den<-kde2d(pru$hora1, pru$hora2)
+
+  plot_ly(x = den$x,
+          y = den$y,
+          z = den$z) %>% add_surface()
+  
+  
+  
+  dinc1_6
+  
+  
+imputed<-  imputar(MC=dinc1_6,DC=dcomp,metodo ="MV" )
+
+
+fil<-imputed %>%
+  dplyr::filter(weekdays(Fecha)=="lunes")%>%
+  melt(id="Fecha")
+
+pimp<-  ggplot(fil,aes(y=value, x=variable))+
+  geom_boxplot(fill="lightgreen", alpha=0.8) + 
+  xlab("Horas")+
+  geom_hline(yintercept=0, linetype="dashed", color = "red",size=0.5)+
+  ylim(min(fil$value), max(fil$value))+
+  ylab(" $PM_{2.5} (\\mu/m^3)$ ")+
+  theme(axis.text.x = element_text(size = rel(0.65)))+
+  ggtitle("Boxplots Lunes")
+
+
+pimppl<-ggplotly(pimp) %>%
+  config(mathjax = "cdn")
+
+

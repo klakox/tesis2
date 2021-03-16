@@ -1,0 +1,13 @@
+name: tesis
+title: tesis
+username:
+account: alejandrovillarreal
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3795954
+bundleId: 4349663
+url: https://alejandrovillarreal.shinyapps.io/tesis/
+when: 1615841168.44
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .gitattributes|.RData|borisbrechas.png|collapse.js|correcion presentacion.txt|funcionimpV3.R|plotlys.html|plotlys1.html|presentacion.html|presentacion.Rmd|style4.css|presentacion_files

@@ -1,0 +1,17 @@
+PLanteamiento del problema (Ultimo parrafo)
+
+- El reto cosiste en determinar la existencia de estas 7 distribuciones normales 24-variadas y con sus
+propiedades proponer un método de imputación para los datos faltante de pm2.5
+
+Justificacion 
+
+(Importancia) que la información de la calidad del aire sea precisa
+ para generar indicadores confiables que permitan impulsar acciones.
+
+Objetivos 
+
+Evaluar vía simulación la precisión del(los) método(s) de imputación propuesto(s).
+
+Escoger entre los evaluados, el método que mejor se ajuste para imputar los datos faltantes de 
+PM2⋅5 a partir de cada normal multivariada.
+
