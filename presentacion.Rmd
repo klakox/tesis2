@@ -55,7 +55,7 @@ margin-top:100px">
 
 - La recolección de información de los contaminantes se ve afectada por diversos motivos que generan espacios en blanco o faltas en las bases de datos que pueden afectar en las propiedades de los indicadores.
 
-- En un estudio previo (OteroP) reportan que las mediciones por hora $i\,\,\, (i=1,...,24)$ del día $j\,\,\, (j=1,...,7)$ se distribuyen normal. además que pueden existir distribuciones normales bivariadas entre cada hora $(i\,\,\, e\,\,\, i')$.
+- En un estudio previo Otero & Presiga (2019) reportan que las mediciones por hora $i\,\,\, (i=1,...,24)$ del día $j\,\,\, (j=1,...,7)$ se distribuyen normal. además que pueden existir distribuciones normales bivariadas entre cada hora $(i\,\,\, e\,\,\, i')$.
 
 - Ahora bien, en un escenario ideal el proceso generador del $PM_{2 . 5}$ en un día $j$ se distribuye normal multivariado. Así, se tendrán 7 normales 24-variadas.
 
@@ -79,7 +79,7 @@ Para aportar en el desarrollo de métodologías de imputación a partir de la no
 ## Contextual
 
 
-La evidencia entre la relación de las concentraciones de $PM_{2_{\cdot }5}$ y $PM_{10}$ en el aire con enfermedades de tipo respiratorio y cardiovascular aumentando la morbilidad de los seres humanos, en especial en las grandes ciudades (OMS).
+La evidencia entre la relación de las concentraciones de $PM_{2_{\cdot }5}$ y $PM_{10}$ en el aire con enfermedades de tipo respiratorio y cardiovascular aumentando la morbilidad de los seres humanos, en especial en las grandes ciudades (OMS, 2018b).
 
 Importancia que la información de la calidad del aire sea precisa para generar indicadores confiables que permitan impulsar acciones.
 
@@ -111,35 +111,46 @@ Proponer un método de imputación para los datos faltantes de $PM_{2_{\cdot }5}
 
 ---
 #Antecedentes
-
+<div style="text-align: justify">
 <br>
+<div class="wrap-collabsible">
+<input id="collapsible09" class="toggle" type="checkbox"><label for="collapsible09" class="lbl-toggle">
+Junger & De Leon (2015)
+<br>
+</label>
+<div class="collapsible-content">
+<div class="content-inner">
+<p class="text">
+Aplica un algoritmo de imputación múltiple para series de tiempo multivariadas en 10 estaciones de monitoreo de PM10 en Sao Pablo. Mediante el algoritmo EM estiman $\mu\,\,,\Sigma$ y ajustan modelos ARIMA a cada serie de tiempo univariada para actualizar las estimaciones. La imputación usando el algorimo EM regular arrojo estimaciones precisas bajo diferentes porcentajes de de faltas (5%, 10% ) incluso con el incumplimiento del supuesto missing at random (MAR).
+</div>
+</div>
+</div>
+
+
 
 <div class="wrap-collabsible">
 <input id="collapsible10" class="toggle" type="checkbox"><label for="collapsible10" class="lbl-toggle">
-Antecedente 1(2020)
+Caicedo & Jimenez (2016)
 <br>
 </label>
 <div class="collapsible-content">
 <div class="content-inner">
 <p class="text">
-texto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumen
-
+ Proponen un método de imputación para los datos faltantes de las concentraciones horarias promedio de $PM_{2_{\cdot }5}$ en la estación Univalle de Santiago de Cali, basado en que el proceso generador de cada hora - día de la semana es normal con parámetros estimados a partir del análisis de datos funcionales.
 </div>
 </div>
 </div>
-
-<br>
 
 <div class="wrap-collabsible">
 <input id="collapsible11" class="toggle" type="checkbox"><label for="collapsible11" class="lbl-toggle">
-Antecedente 2(2020)
+Otero & Presiga (2019)
 <br>
 </label>
 <div class="collapsible-content">
 <div class="content-inner">
 <p class="text">
-texto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumentexto resumen
-
+Evalúan el método propuesto por Caicedo & Jimenez (2016), además de incluir una nueva propuesta de imputación donde en lugar de generar un sólo valor de la distribución del hora-día de la semana se generan 5 y el valor imputado será el promedio de estos. Encontrando resultados  promisorios, recomendando que se puede seguir con el estudio incluyendo una estructura de correlación entre las horas de cada día de la semana.
+</div>
 </div>
 </div>
 </div>
@@ -231,7 +242,7 @@ Los niveles máximos permisibles internacionales son más estrictos y Colombia s
 
 <div style="text-align: justify">
 
-Sea $Y = (Y_1,...,Y_n)$ un vector aleatorio con función de probabilidad $f_{\theta}$,  donde  $\theta$ es el vector de parámetros de interés, y a $M = (M_i,...,M_n)$ como el indicador de falta asociado al vector aleatorio Y, que toma el valores:
+Sea $X = (X_1,...,X_p)$ un vector aleatorio con función de probabilidad $f_{\theta}$,  donde  $\theta$ es el vector de parámetros de interés y a $M = (M_i,...,M_p)$ como el indicador de falta asociado al vector aleatorio X, que toma el valores:
 <div/>
 
 $$m_i = \left\{\begin{matrix}
@@ -240,10 +251,10 @@ $$m_i = \left\{\begin{matrix}
 \end{matrix}\right.$$
 
 <div style="text-align: justify">
-La probabilidad de que $M$ tome el valor de $m=(m_1,...,m_n)$ dado que $Y$ toma el valor de $y=y_1,...,y_n$ es:
+La probabilidad de que $M$ tome el valor de $m=(m_1,...,m_p)$ dado que $X$ toma el valor de $x=x_1,...,x_p$ es:
 <div/>
 
-$$g_\phi(m|y) = g_\phi(m|(y_{(0)},y_{(1)}))$$
+$$g_\phi(m|x) = g_\phi(m|(x_{(0)},x_{(1)}))$$
 <div/>
 
 
@@ -262,11 +273,11 @@ Rubin (1976) Plantea formalmente el fenómeno de datos faltantes, de los cuales 
 - Los datos faltantes son perdidos totalmente al azar (MCAR): 
 Es el supuesto más general en el que se afirma que el proceso generador es independiente de la variable de interés Y:
 
-$$g_{\phi}(m|y)= g_{\phi}(m)$$
+$$g_{\phi}(m|x)= g_{\phi}(m)$$
     
 - Los datos faltantes son perdidos al azar (MAR): Este supuesto afirma que el proceso generador de faltas depende solo de los datos observados:
 
-$$g_{\phi}(m|y)= g(m|y_{(1)})$$
+$$g_{\phi}(m|x)= g(m|x_{(1)})$$
 
 <div/>
 
@@ -279,9 +290,9 @@ $$g_{\phi}(m|y)= g(m|y_{(1)})$$
 <div style="text-align: justify">
 - Los datos faltantes no son perdidos al azar (MNAR): Dicho supuesto radica en que la presencia de un dato faltante en una variable Y depende tanto de sus valores observados como sus valores perdidos, que en términos de probabilidad se denota como:
 
-$$g_{\phi}(m|y) = g_{\phi}(m| y_{(1)},y_{(0)})$$
+$$g_{\phi}(m|x) = g_{\phi}(m| x_{(1)},x_{(0)})$$
 
-Así pues, la probabilidad de que falten datos en $Y$ depende tanto de los valores observados como de los valores perdidos.
+Así pues, la probabilidad de que falten datos en $X$ depende tanto de los valores observados como de los valores perdidos.
 <div/>
 
 
@@ -289,7 +300,10 @@ Así pues, la probabilidad de que falten datos en $Y$ depende tanto de los valor
 
 # Marco teórico
 
-## Test de Little para probar MCAR
+## Prueba de Little (1988) 
+
+<div style="text-align: justify">
+
 
 - Se define $a=1,...,A$ donde $a$ es un patrón de faltas en $X= (X_1,...,X_i,...,X_p)$ con $X \sim NMV$.
 
@@ -297,21 +311,25 @@ Así pues, la probabilidad de que falten datos en $Y$ depende tanto de los valor
 
 - Por último $D_a$ de dimensión $p * p_a$ (con $p_a$ el número de variables observadas en el patrón $a$), es una matriz indicadora de las variables que fueron observadas en el patrón a, que tiene una columna para cada variable presente que consta de p-1 ceros y 1 uno.
 
+<div/>
 
 ---
 
 # Marco teórico
 
-## Test de Little para probar MCAR
+## Prueba de Little (1988)
+<div style="text-align: justify">
 
-$$H_0:(x_{(1),k} | m_a )\sim N(\mu_{(1),a},\Sigma_{(1),a})\,\,\,\,VS\,\,\,\,   
- H_a: (x_{(1),k} | m_a )\sim N(v_{(1),a},\Sigma_{(1),a})$$
+
+$$H_0:(x_{(1),a} | m_a )\sim N(\mu_{(1),a},\Sigma_{(1),a})\\  
+ H_a: (x_{(1),a} | m_a )\sim N(v_{(1),a},\Sigma_{(1),a})$$
  
- Con,
+Donde se tiene el estadístico de prueba,
 
 $$d_0^2 = \sum_{a=1}^\mathbf{A} r_a (\bar{x}_{(1),a} - \mu_{(1),a})\Sigma_{(1),a}^{-1}(\bar{x}_{(1),a} - \mu_{(1),a})^T \sim \chi^2_{(\sum p_a - p)}$$
  
-Con $\bar{x}_{(1),a}= r_a^-1$ $\sum_{k \in \mathbf{X_a}} x_{(1),k}$ siendo $x_{(1,k)}$ el vector de valores observados para una día k cualquiera en $\mathbf{X_a}$, $\hat{\mu}_{(1)a}=\tilde{\mu}D_{a}$  y $\hat{\Sigma}_{(1),a} = D_a^T \tilde{\Sigma} D_a$, medias y matrices de covarianzas de las variables observadas en el patrón a. Así pues, (6) se distribuye $\chi^2$ con $\sum_a p_a - p$ grados de libertad.
+Con $\bar{x}_{(1),a}= r_a^-1$ $\sum_{k \in \mathbf{X_a}} x_{(1),k}$ siendo $x_{(1,k)}$ el vector de valores observados para una día k cualquiera en $\mathbf{X_a}$, $\hat{\mu}_{(1)a}=\tilde{\mu}D_{a}$  y $\hat{\Sigma}_{(1),a} = D_a^T \tilde{\Sigma} D_a$, medias y matrices de covarianzas de las variables observadas en el patrón a. El estadístico de la escuación (7) se distribuye $\chi^2$ con $\sum_a p_a - p$ grados de libertad.
+<div/>
 
 ---
 
@@ -403,7 +421,10 @@ Para hallar los estimadores de $\boldsymbol{\mu}$ y $\Sigma$ se usa el método d
 $$\boldsymbol{\hat{\mu}}=\mathbf{\bar{X}}=\frac{1}{n}\sum_{j=1}^{n}\mathbf{X_j }    \, \, \, \, \, Y \, \, \, \, \,
 \hat{\Sigma}=\mathbf{S}=\frac{1}{n-1}\sum_{j=1}^{n}\left ( \mathbf{X_j}-\mathbf{\bar{X}} \right )\left (\mathbf{ X_j}-\mathbf{\bar{X}} \right )^{T}$$
  
-En este caso $S$ pueden presentar problemas de condicionamiento debido a que $n \approx p$. Godino Gomez (2014)
+En este caso $S$ pueden presentar problemas de condicionamiento debido a que $n \approx p$. Godino Gomez (2014),esto se puede evaluar la mediante número de condición $k(\Sigma)$.
+
+$$k(\Sigma)=\frac{w_{max}}{w_{mín}}$$
+
 
 <div/>
 
@@ -430,6 +451,28 @@ s_{ii}& si, i=j\\
 \end{Bmatrix}$$
 
 <div/>
+
+---
+
+# Marco teórico
+
+## Prueba de Mardia(1970)
+<div style="text-align: justify">
+Sea $\hat{\gamma_{1}}$ el coeficiente de simetría estimado de una muestra normal p-variada y $\hat{\gamma_{2}}$ el coeficiente de curtósis estimado, se pretende validar el supuesto de normalidad p-variada de un vector $X=(X_1,..., X_p)$, mediante los siguientes dos estadísticos:
+
+### Simetría
+
+$$\hat{\gamma_{1}} =\frac{n}{6} \frac{1}{n^2} \sum_{b=1}^n \sum_{c=1}^n d_{bc}^3 \sim \chi_{gl = \frac{p(p-1)(p+1)}{6}}$$
+
+### Curtosis
+
+$$\hat{\gamma_{2}} = \frac{1}{n^2} \sum_{b=1}^n d_{bb}^2 \sim N \left(p(p+2), \frac{8p(p+2)}{n} \right)$$
+
+
+<div/>
+
+
+
 ---
 
 # Marco teórico
@@ -466,7 +509,7 @@ Así el método de imputación propuesto se basa en utilizar la distribución co
 
 Nota:
 
-- Un día podrá tener de 1 a 6 mediciones faltantes consecutivas como máximo ya que de acuerdo a la norma, debe contarse con al menos el 75\% de información para realizar análisis y estimaciones de indicadores.
+- Un día podrá tener de 1 a 6 mediciones faltantes consecutivas como máximo ya que de acuerdo a la norma, debe contarse con al menos el 75% de información para realizar análisis y estimaciones de indicadores.
 
 - La generación de los escenarios se realiza siguiendo la metodología propuesta por Otero $\&$ Presiga (2018), este método comienza haciendo un análisis de los datos faltantes en brechas horarias.
 
