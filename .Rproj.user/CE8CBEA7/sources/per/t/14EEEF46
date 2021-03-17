@@ -3,7 +3,7 @@
     "path": "~/tesis/presentacion.Rmd",
     "project_path": "presentacion.Rmd",
     "type": "r_markdown",
-    "hash": "348361158",
+    "hash": "1111794354",
     "contents": "",
     "dirty": false,
     "created": 1615583148041.0,
@@ -11,16 +11,16 @@
     "relative_order": 1,
     "properties": {
         "tempName": "Untitled2",
-        "cursorPosition": "106,116",
-        "scrollLine": "96",
+        "cursorPosition": "881,19",
+        "scrollLine": "874",
         "docOutlineVisible": "1"
     },
     "folds": "",
-    "lastKnownWriteTime": 1615950481,
+    "lastKnownWriteTime": 1615961367,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1615950481581,
+    "last_content_update": 1615961367083,
     "read_only": false,
     "read_only_alternatives": []
 }

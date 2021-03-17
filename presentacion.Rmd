@@ -25,6 +25,12 @@ library(ggcorrplot)
 class: center, middle
 ### /ʃæ.'riŋ.ɡæn/
 
+<center>
+
+<img src="logos2.png" style="width:65%">
+
+</center>
+
 <script type="text/x-mathjax-config">
   MathJax.Hub.Config({ TeX: { equationNumbers: {autoNumber: "all"} } });
 </script>
@@ -40,7 +46,7 @@ margin-top:100px"
 
 <div/>
 
-El presente documento corresponde a una propuesta de imputación para una base de datos de contaminante atmosférico $PM_{2.5}$ a partir de la distribución normal multivariada. La información usada pertenece al sistema de vigilancia de la calidad del aire (SVCA) de Cali y consta de mediciones horarias tomadas diariamente durante el año 2018 en la estación de Univalle.
+Esta expocisión corresponde a una propuesta de imputación para una base de datos de contaminante atmosférico $PM_{2.5}$ a partir de la distribución normal multivariada. La información usada pertenece al sistema de vigilancia de la calidad del aire (SVCA) de Cali y consta de mediciones horarias tomadas diariamente durante el año 2018 en la estación de Univalle.
 
 
 
@@ -74,7 +80,7 @@ margin-top:100px">
 ## Estadística
 Aportar a partir de la imputación estadística a mejorar las estimaciones para indicadores de la calidad del aire conservando la calidad de la información.
 
-Para aportar en el desarrollo de métodologías de imputación a partir de la normal multivariada en bases de datos de contaminación ambiental,  cambiando la perspectiva de datos funcionales.
+Para aportar en el desarrollo de métodologías de imputación a partir de la normal multivariada en bases de datos de contaminación ambiental.
 
 ## Contextual
 
@@ -121,7 +127,7 @@ Junger & De Leon (2015)
 <div class="collapsible-content">
 <div class="content-inner">
 <p class="text">
-Aplica un algoritmo de imputación múltiple para series de tiempo multivariadas en 10 estaciones de monitoreo de PM10 en Sao Pablo. Mediante el algoritmo EM estiman $\mu\,\,,\Sigma$ y ajustan modelos ARIMA a cada serie de tiempo univariada para actualizar las estimaciones. La imputación usando el algorimo EM regular arrojo estimaciones precisas bajo diferentes porcentajes de de faltas (5%, 10% ) incluso con el incumplimiento del supuesto missing at random (MAR).
+Aplican un algoritmo de imputación múltiple para series de tiempo multivariadas en 10 estaciones de monitoreo de PM10 en Sao Pablo. Mediante el algoritmo EM estiman $\mu\,\,,\Sigma$ y ajustan modelos ARIMA a cada serie de tiempo univariada para actualizar las estimaciones. La imputación usando el algorimo EM regular arrojo estimaciones precisas bajo diferentes porcentajes de de faltas (5% y 40%) incluso con el incumplimiento del supuesto missing at random (MAR).
 </div>
 </div>
 </div>
@@ -242,7 +248,7 @@ Los niveles máximos permisibles internacionales son más estrictos y Colombia s
 
 <div style="text-align: justify">
 
-Sea $X = (X_1,...,X_p)$ un vector aleatorio con función de probabilidad $f_{\theta}$,  donde  $\theta$ es el vector de parámetros de interés y a $M = (M_i,...,M_p)$ como el indicador de falta asociado al vector aleatorio X, que toma el valores:
+Sea $X = (X_1,...,X_p)$ un vector aleatorio con función de probabilidad $f_{\theta}$,  donde  $\theta$ es el vector de parámetros de interés y a $M = (M_i,...,M_p)$ como el indicador de falta asociado al vector aleatorio $X$, que toma el valores:
 <div/>
 
 $$m_i = \left\{\begin{matrix}
@@ -328,7 +334,7 @@ Donde se tiene el estadístico de prueba,
 
 $$d_0^2 = \sum_{a=1}^\mathbf{A} r_a (\bar{x}_{(1),a} - \mu_{(1),a})\Sigma_{(1),a}^{-1}(\bar{x}_{(1),a} - \mu_{(1),a})^T \sim \chi^2_{(\sum p_a - p)}$$
  
-Con $\bar{x}_{(1),a}= r_a^-1$ $\sum_{k \in \mathbf{X_a}} x_{(1),k}$ siendo $x_{(1,k)}$ el vector de valores observados para una día k cualquiera en $\mathbf{X_a}$, $\hat{\mu}_{(1)a}=\tilde{\mu}D_{a}$  y $\hat{\Sigma}_{(1),a} = D_a^T \tilde{\Sigma} D_a$, medias y matrices de covarianzas de las variables observadas en el patrón a.
+Con $\bar{x}_{(1),a}= r_a^-1$ $\sum_{k \in \mathbf{X_a}} x_{(1),k}$ siendo $x_{(1),k}$ el vector de valores observados para una día k cualquiera en $\mathbf{X_a}$, $\hat{\mu}_{(1)a}=\tilde{\mu}D_{a}$  y $\hat{\Sigma}_{(1),a} = D_a^T \tilde{\Sigma} D_a$, medias y matrices de covarianzas de las variables observadas en el patrón a.
 <div/>
 
 ---
@@ -341,7 +347,11 @@ Con $\bar{x}_{(1),a}= r_a^-1$ $\sum_{k \in \mathbf{X_a}} x_{(1),k}$ siendo $x_{(
 
 La función de densidad multivariada es una generalización de la densidad normal univariada. Así, dado un vector aleatorio $\mathbf{X}^T=[X_1,X_2,...,X_p]$ con distribución normal p-variada su función de densidad se denota a continuación:
  
-$$f(\mathbf{x})=\frac{1}{(2\pi)^{p/2}\left| \Sigma \right| ^{1/2}}e^{-\frac{1}{2}(\mathbf{x}-\boldsymbol{\mu})^T\Sigma^{-1}(\mathbf{x}-\boldsymbol{\mu})}$$
+$$f(\mathbf{x})=\frac{1}{(2\pi)^{p/2}\left| \Sigma \right| ^{1/2}}e^{-\frac{1}{2}(\mathbf{x}-\boldsymbol{\mu})^T\Sigma^{-1}(\mathbf{x}-\boldsymbol{\mu})}\;\;\;\;\begin{matrix}
+\mathbf{x}\in \mathbb{R}^p \\ 
+\boldsymbol{\mu} \in \mathbb{R}^p\\ 
+\Sigma \in \mathbb{R}^{p*p}
+\end{matrix}$$
  
 - $\mu$: Representa el vector de medias del vector aleatorio.
     
@@ -418,8 +428,8 @@ Enunciado de otra forma, la distribución de $\mathbf{X_1}|\mathbf{X_2}=\mathbf{
 
 Para hallar los estimadores de $\boldsymbol{\mu}$ y $\Sigma$ se usa el método de estimación por máxima verosimilitud teniendo como resultado que:
  
-$$\boldsymbol{\hat{\mu}}=\mathbf{\bar{X}}=\frac{1}{n}\sum_{j=1}^{n}\mathbf{X_j }    \, \, \, \, \, Y \, \, \, \, \,
-\hat{\Sigma}=\mathbf{S}=\frac{1}{n-1}\sum_{j=1}^{n}\left ( \mathbf{X_j}-\mathbf{\bar{X}} \right )\left (\mathbf{ X_j}-\mathbf{\bar{X}} \right )^{T}$$
+$$\boldsymbol{\hat{\mu}}=\mathbf{\bar{X}}=\frac{1}{n}\sum_{k=1}^{n}\mathbf{X_k }    \, \, \, \, \, Y \, \, \, \, \,
+\hat{\Sigma}=\mathbf{S}=\frac{1}{n-1}\sum_{k=1}^{n}\left ( \mathbf{X_k}-\mathbf{\bar{X}} \right )\left (\mathbf{ X_k}-\mathbf{\bar{X}} \right )^{T}$$
  
 En este caso $S$ pueden presentar problemas de condicionamiento debido a que $n \approx p$. Godino Gomez (2014),esto se puede evaluar la mediante número de condición $k(\Sigma)$.
 
@@ -443,7 +453,7 @@ Se presenta una estimación diferente de las matrices de varianza y convarianza 
 
 $$\Sigma^*  = \lambda T + (1-\lambda) S$$
 
-Donde T es llamada matriz objetivo y representa un modelo reducido de la matriz de covarianzas en el que se estiman menos parámetros y $\lambda \,\, \in [0,1]$ representa la intensidad de contracción (Schäfer \& Strimmer 2005).
+Donde T es llamada matriz objetivo y representa un modelo reducido de la matriz de covarianzas en el que se estiman menos parámetros y $\lambda \,\, \in [0,1]$ representa la intensidad de contracción (Schäfer & Strimmer, 2005).
 
 $$T=\begin{Bmatrix}
 s_{ii}& si, i=j\\ 
@@ -456,18 +466,22 @@ s_{ii}& si, i=j\\
 
 # Marco teórico
 
-## Prueba de Mardia(1970)
+## Prueba de Mardia (1970)
 
 <div style="text-align: justify">
 Sea $\hat{\gamma_{1}}$ el coeficiente de simetría estimado de una muestra normal p-variada y $\hat{\gamma_{2}}$ el coeficiente de curtósis estimado, se pretende validar el supuesto de normalidad p-variada de un vector $X=(X_1,..., X_p)$, mediante los siguientes dos estadísticos:
 
 ### Simetría
 
-$$\hat{\gamma_{1}} =\frac{n}{6} \frac{1}{n^2} \sum_{b=1}^n \sum_{c=1}^n d_{bc}^3 \sim \chi_{gl = \frac{p(p-1)(p+1)}{6}}$$
+$$\frac{n}{6}\hat{\gamma_{1}} =\frac{n}{6} \frac{1}{n^2} \sum_{b=1}^n \sum_{c=1}^n d_{bc}^3 \sim \chi_{gl = \frac{p(p-1)(p+1)}{6}}$$
 
 ### Curtosis
 
 $$\hat{\gamma_{2}} = \frac{1}{n^2} \sum_{b=1}^n d_{bb}^2 \sim N \left(p(p+2), \frac{8p(p+2)}{n} \right)$$
+
+Donde
+
+$$d_{bc}=(x_b-\bar{x})^TS^{-1}(x_c-\bar{x})$$
 
 
 <div/>
@@ -476,7 +490,7 @@ $$\hat{\gamma_{2}} = \frac{1}{n^2} \sum_{b=1}^n d_{bb}^2 \sim N \left(p(p+2), \f
 
 # Marco teórico
 
-## Prueba de Mardia(1970)
+## Prueba de Mardia (1970)
 
 ### Hipótesis
 
