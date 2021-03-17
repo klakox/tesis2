@@ -33,14 +33,14 @@ class: center, middle
 
 ---
 
-#Resumen
+#Introducción
 
 <div style="text-align: justify;
 margin-top:100px"
 
 <div/>
 
-Se propone un método de imputación de datos faltantes del contaminante $PM_{2.5}$, de la estación Univalle, 2018. Cada día de la semana se asume distribuido normal 24-variado y a partir de las propiedades de esta distribución, se imputan los datos hallando las distribuciones condicionales para las horas faltantes a partir de las horas disponibles. Se prueba el supuesto de datos faltantes completamente al azar (MCAR) mediante el test de Little (1988) y se prueba normalidad multivariada usando el test de Mardia (1970). Se evalúa la propuesta vía simulación, obteniendo valores promedio de $R^2= 0.47$ y $RMSE=8.6$ respectivamente, lo que muestra que la propuesta es promisoria mejorando imputaciones anteriormente utilizadas.
+El presente documento corresponde a una propuesta de imputación para una base de datos de contaminante atmosférico $PM_{2.5}$ a partir de la distribución normal multivariada. La información usada pertenece al sistema de vigilancia de la calidad del aire (SVCA) de Cali y consta de mediciones horarias tomadas diariamente durante el año 2018 en la estación de Univalle.
 
 
 
@@ -59,7 +59,7 @@ margin-top:100px">
 
 - Ahora bien, en un escenario ideal el proceso generador del $PM_{2 . 5}$ en un día $j$ se distribuye normal multivariado. Así, se tendrán 7 normales 24-variadas.
 
-- El reto consiste en estimar los parámetros asociados a estas distribuciones, siendo necesario probar el supuesto de normalidad multivariada y evaluar las propiedades de estas estimaciones mediante herramientas estadísticas.
+- El reto cosiste en determinar la existencia de estas 7 distribuciones normales 24-variadas y con sus propiedades proponer un método de imputación para los datos faltantes de $PM_{2 . 5}$.
 
 
 <div/>
@@ -81,7 +81,7 @@ Para aportar en el desarrollo de métodologías de imputación a partir de la no
 
 La evidencia entre la relación de las concentraciones de $PM_{2_{\cdot }5}$ y $PM_{10}$ en el aire con enfermedades de tipo respiratorio y cardiovascular aumentando la morbilidad de los seres humanos, en especial en las grandes ciudades (OMS, 2018b).
 
-Importancia que la información de la calidad del aire sea precisa para generar indicadores confiables que permitan impulsar acciones.
+Es importante que la información de la calidad del aire sea precisa para generar indicadores confiables que permitan impulsar acciones.
 
 <div/>
 
@@ -102,9 +102,9 @@ Proponer un método de imputación para los datos faltantes de $PM_{2_{\cdot }5}
 
 - Estimar las matrices de varianzas y covarianzas de los datos de $PM_{2_{\cdot }5}$ para para cada día j $(j=1,...,7)$ con el fin proponer la distribución de cada día como una Normal 24-variada.
 
-- Escoger entre los evaluados, el método que mejor se ajuste para imputar los datos faltantes de $PM_{2_{\cdot }5}$ a partir de cada normal multivariada.
+- Evaluar vía simulación la precisión del(los) método(s) de imputación propuesto(s).
 
-- Evaluar vía simulación la precisión del método de imputación propuesto.
+- Escoger entre los evaluados, el método que mejor se ajuste para imputar los datos faltantes de  $PM_{2_{\cdot }5}$5 a partir de cada normal multivariada.
 
 <div/>
 
@@ -328,7 +328,7 @@ Donde se tiene el estadístico de prueba,
 
 $$d_0^2 = \sum_{a=1}^\mathbf{A} r_a (\bar{x}_{(1),a} - \mu_{(1),a})\Sigma_{(1),a}^{-1}(\bar{x}_{(1),a} - \mu_{(1),a})^T \sim \chi^2_{(\sum p_a - p)}$$
  
-Con $\bar{x}_{(1),a}= r_a^-1$ $\sum_{k \in \mathbf{X_a}} x_{(1),k}$ siendo $x_{(1,k)}$ el vector de valores observados para una día k cualquiera en $\mathbf{X_a}$, $\hat{\mu}_{(1)a}=\tilde{\mu}D_{a}$  y $\hat{\Sigma}_{(1),a} = D_a^T \tilde{\Sigma} D_a$, medias y matrices de covarianzas de las variables observadas en el patrón a. El estadístico de la escuación (7) se distribuye $\chi^2$ con $\sum_a p_a - p$ grados de libertad.
+Con $\bar{x}_{(1),a}= r_a^-1$ $\sum_{k \in \mathbf{X_a}} x_{(1),k}$ siendo $x_{(1,k)}$ el vector de valores observados para una día k cualquiera en $\mathbf{X_a}$, $\hat{\mu}_{(1)a}=\tilde{\mu}D_{a}$  y $\hat{\Sigma}_{(1),a} = D_a^T \tilde{\Sigma} D_a$, medias y matrices de covarianzas de las variables observadas en el patrón a.
 <div/>
 
 ---
@@ -457,6 +457,7 @@ s_{ii}& si, i=j\\
 # Marco teórico
 
 ## Prueba de Mardia(1970)
+
 <div style="text-align: justify">
 Sea $\hat{\gamma_{1}}$ el coeficiente de simetría estimado de una muestra normal p-variada y $\hat{\gamma_{2}}$ el coeficiente de curtósis estimado, se pretende validar el supuesto de normalidad p-variada de un vector $X=(X_1,..., X_p)$, mediante los siguientes dos estadísticos:
 
@@ -471,7 +472,17 @@ $$\hat{\gamma_{2}} = \frac{1}{n^2} \sum_{b=1}^n d_{bb}^2 \sim N \left(p(p+2), \f
 
 <div/>
 
+---
 
+# Marco teórico
+
+## Prueba de Mardia(1970)
+
+### Hipótesis
+
+$$H_0 : Los\,\,datos\,\,se\,\,distribuyen\,\,normal \\ 
+H_a : Los\,\,datos\,\,no\,\,se\,\,distribuyen\,\,normal$$
+Para aceptar que una muestra aleatoria multivariada proviene de una distribución normal p-variada se deben cumplir ambas condiciones.
 
 ---
 
@@ -535,7 +546,7 @@ Nota:
 </center>
 
 <div style="text-align: center">
-Figura 2: sep $PM_{2_{\cdot }5}$
+**Figura 1**: Distribución de brechas.
 <div/>
 
 <!-- ![](borisbrechas.png) -->
@@ -830,14 +841,183 @@ Figura 2: sep $PM_{2_{\cdot }5}$
 margin-top:100px">
 <div/>
 
-$$RMSE=\sqrt{\frac{1}{M}\sum_{i=1}^{M}\left ( P_i-O_i \right )^2}$$
+$$RMSE=\sqrt{\frac{1}{H}\sum_{i=1}^{H}\left(\hat{x}_h-x_h\right)^2}$$
  
-$$R^2=\left ( \frac{1}{M} \frac{\sum_{i=1}^{M}\left ( P_i-\bar{P} \right )\left ( O_i-\bar{O} \right )}{\sigma_P \sigma_O} \right )^2$$
+$$R^2= \left(\frac{1}{H}\frac{\sum_{h=1}^{H}(\hat{x}_h-\bar{\hat{x}})*(x_h - \bar{x}}{\sigma_{\hat{x}}\sigma_x}\right)^2$$
 
 
 ---
 
 # Resultados
+
+<div style="text-align: center">
+<div/>
+
+```{r message=FALSE, warning=FALSE}
+library(Amelia)
+
+basepm<-read_delim("C:/Users/Alejandro/Desktop/6.-univalle-2013-2018.csv", 
+                   ";", escape_double = FALSE, trim_ws = TRUE)
+a<-basepm %>%
+  dplyr::select(-c("NO2  (ug/m3)" , "O3  (ug/m3)"  )) %>%
+  dplyr::rename(Fecha=`Fecha & Hora`, PM2.5=`PM2,5 (ug/m3)`) %>%
+  summarize(Fecha,hora=as.factor(as.numeric(str_sub(Fecha,-5,-4))+1),PM2.5=PM2.5) %>%
+  mutate(Fecha=as.Date(Fecha,format='%m/%d/%Y'),PM2.5=as.numeric(PM2.5)) %>%
+  filter(year(Fecha) =="2018") %>%
+  cast(Fecha~hora)
+missmap(a[,-1],rank.order = F,y.labels =  c(365:1),main="Mapa de datos faltantes")
+```
+
+<div style="text-align: center">
+**Figura 2**: Mapa de datos faltantes.
+<div/>
+
+---
+
+# Resultados
+
+<style type="text/css">
+.tg  {border:none;border-collapse:collapse;border-spacing:0;}
+.tg td{border-style:solid;border-width:0px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;
+  padding:10px 5px;word-break:normal;}
+.tg th{border-style:solid;border-width:0px;font-family:Arial, sans-serif;font-size:14px;font-weight:normal;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-c3ow{border-color:inherit;text-align:center;vertical-align:top}
+</style>
+<table class="tg">
+<thead>
+  <tr>
+    <th class="tg-c3ow">j</th>
+    <th class="tg-c3ow">Día de la semana</th>
+    <th class="tg-c3ow">Días Completos</th>
+    <th class="tg-c3ow">Frecuencia</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-c3ow">1</td>
+    <td class="tg-c3ow">Lunes</td>
+    <td class="tg-c3ow">26</td>
+    <td class="tg-c3ow">0.5</td>
+  </tr>
+  <tr>
+    <td class="tg-c3ow">2</td>
+    <td class="tg-c3ow">Martes</td>
+    <td class="tg-c3ow">34</td>
+    <td class="tg-c3ow">0.65</td>
+  </tr>
+  <tr>
+    <td class="tg-c3ow">3</td>
+    <td class="tg-c3ow">Miércoles</td>
+    <td class="tg-c3ow">33</td>
+    <td class="tg-c3ow">0.63</td>
+  </tr>
+  <tr>
+    <td class="tg-c3ow">4</td>
+    <td class="tg-c3ow">Jueves</td>
+    <td class="tg-c3ow">28</td>
+    <td class="tg-c3ow">0.54</td>
+  </tr>
+  <tr>
+    <td class="tg-c3ow">5</td>
+    <td class="tg-c3ow">Viernes</td>
+    <td class="tg-c3ow">32</td>
+    <td class="tg-c3ow">0.62</td>
+  </tr>
+  <tr>
+    <td class="tg-c3ow">6</td>
+    <td class="tg-c3ow">Sábado</td>
+    <td class="tg-c3ow">35</td>
+    <td class="tg-c3ow">0.67</td>
+  </tr>
+  <tr>
+    <td class="tg-c3ow">7</td>
+    <td class="tg-c3ow">Domingo</td>
+    <td class="tg-c3ow">32</td>
+    <td class="tg-c3ow">0.62</td>
+  </tr>
+  <tr>
+    <td class="tg-c3ow"></td>
+    <td class="tg-c3ow">Total</td>
+    <td class="tg-c3ow">220</td>
+    <td class="tg-c3ow"> </td>
+  </tr>
+</tbody>
+</table>
+<div style="text-align: center">
+**Tabla 6**: Días completos por día de la semana.
+<div/>
+
+---
+
+# Resultados
+
+<style type="text/css">
+.tg  {border:none;border-collapse:collapse;border-spacing:0;}
+.tg td{border-style:solid;border-width:0px;font-family:Arial, sans-serif;font-size:14px;overflow:hidden;
+  padding:10px 5px;word-break:normal;}
+.tg th{border-style:solid;border-width:0px;font-family:Arial, sans-serif;font-size:14px;font-weight:normal;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-c3ow{border-color:inherit;text-align:center;vertical-align:top}
+.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
+.tg .tg-dvpl{border-color:inherit;text-align:right;vertical-align:top}
+</style>
+<table class="tg">
+<thead>
+  <tr>
+    <th class="tg-0pky">Horas faltantes</th>
+    <th class="tg-0pky">Categoría</th>
+    <th class="tg-0pky">Frecuencia</th>
+    <th class="tg-0pky">Frec. Rel</th>
+    <th class="tg-0pky">Frec. Acum</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-0pky">0</td>
+    <td class="tg-0pky">Completos</td>
+    <td class="tg-dvpl">220</td>
+    <td class="tg-dvpl">0,603</td>
+    <td class="tg-dvpl">0,603</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">1-6</td>
+    <td class="tg-0pky">Parcial/Completos</td>
+    <td class="tg-dvpl">84</td>
+    <td class="tg-dvpl">0,230</td>
+    <td class="tg-dvpl">0,833</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">7-23</td>
+    <td class="tg-0pky">Parcial/Incompletos</td>
+    <td class="tg-dvpl">42</td>
+    <td class="tg-dvpl">0,115</td>
+    <td class="tg-dvpl">0,948</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">24</td>
+    <td class="tg-0pky">Incompletos</td>
+    <td class="tg-dvpl">19</td>
+    <td class="tg-dvpl">0,052</td>
+    <td class="tg-dvpl">1</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky"></td>
+    <td class="tg-0pky">Total</td>
+    <td class="tg-dvpl">365</td>
+    <td class="tg-dvpl">1</td>
+    <td class="tg-c3ow">-</td>
+  </tr>
+</tbody>
+</table>
+<div style="text-align: center">
+**Tabla 7**: Clasificación de los días según la cantidad datos faltantes.
+<div/>
+
+---
+
+# Resultados
+
 
 
 <div style="text-align: center;
@@ -886,7 +1066,7 @@ htmltools::div( ggpl, align="center" )  # Result is now an HTML object
 ```
 
 <div style="text-align: center">
-**Figura 1**: Proporción de datos faltantes por día de la semana
+**Figura 3**: Proporción de datos faltantes por día de la semana
 <div/>
 
 
@@ -923,7 +1103,7 @@ htmltools::div( pp, align="center" )  # Result is now an HTML object
 ```
 
 <div style="text-align: center">
-**Figura 2**: Gráfico de caja de $PM_{2_{\cdot }5}$ por hora.
+**Figura 4**: Gráfico de caja de $PM_{2_{\cdot }5}$ por hora.
 <div/>
 
 ---
@@ -962,7 +1142,7 @@ htmltools::tags$iframe(
 ```
 
 
-<p style="text-align: center"> <strong>Figura 3</strong>: Gráfico de caja día lunes</p>
+<p style="text-align: center"> <strong>Figura 5</strong>: Gráfico de caja día lunes</p>
 
 ]
 
@@ -997,7 +1177,7 @@ htmltools::tags$iframe(
 )
 ```
 
-<p style="text-align: center"> <strong>Figura 4</strong>: Gráfico de caja día martes</p>
+<p style="text-align: center"> <strong>Figura 6</strong>: Gráfico de caja día martes</p>
 
 
 
@@ -1031,7 +1211,7 @@ cp
 ```
 
 
-<p style="text-align: center"> <strong>Figura 5</strong>: Matriz de correlación día lunes</p>
+<p style="text-align: center"> <strong>Figura 7</strong>: Matriz de correlación día lunes</p>
 
 ]
 
@@ -1061,7 +1241,7 @@ cp1
 
 ```
 
-<p style="text-align: center"> <strong>Figura 6</strong>: Matriz de correlación día martes</p>
+<p style="text-align: center"> <strong>Figura 8</strong>: Matriz de correlación día martes</p>
 
 
 
@@ -1129,7 +1309,7 @@ cp1
 </tbody>
 </table>
 <div style="text-align: center">
-**Tabla 6**: Número de condición para matrices de covarianza de MV y Shrinkage
+**Tabla 8**: Número de condición para matrices de covarianza de MV y Shrinkage
 <div/>
 
 ---
@@ -1223,7 +1403,7 @@ cp1
   </tbody>
   </table>
 <div style="text-align: center">
-**Tabla 7**: Resultados del test de Mardia
+**Tabla 9**: Resultados del test de Mardia
 <div/>
   
   
@@ -1297,7 +1477,7 @@ cp1
 </tbody>
 </table>
 <div style="text-align: center">
-**Tabla 8**: Resultados del test de Little
+**Tabla 10**: Resultados del test de Little
 <div/>
   
   
@@ -1347,7 +1527,7 @@ cp1
 </tbody>
 </table>
 <div style="text-align: center">
-**Tabla 9**: Proporción de datos faltantes dado el porcentaje de días contaminados en la matriz.
+**Tabla 11**: Proporción de datos faltantes dado el porcentaje de días contaminados en la matriz.
 <div/>
 
 ---
@@ -1432,7 +1612,7 @@ cp1
 </tbody>
 </table>
 <div style="text-align: center">
-**Tabla 10**: Desempeño del método de imputación propuesto.
+**Tabla 12**: Desempeño del método de imputación propuesto.
 <div/>
 
 ---
@@ -1446,3 +1626,58 @@ htmltools::tags$iframe(
   width="800", 
   height="550"
 )
+```
+
+---
+
+# Conclusiones
+
+<div style="text-align: justify;
+margin-top:100px"
+
+<div/>
+
+- Datos faltantes e imputacion
+
+- Retos del trabajo
+
+- Resultados
+
+
+---
+
+# Bibliografía
+<div style="text-align: justify;
+margin-top:100px"
+
+<div/>
+
+- A. Otero and M. Presiga. ‘evaluación de un método de imputación basado en el análisis
+de datos funcionales para los registros de pm2.5 en la ciudad de cali’. Trabajo de grado
+es Estadística, Universidad del Valle, Colombia, 2019.
+
+- R. Johnson and D. Wichern. Applied Multivariate Statistical Analysis. Applied Multivariate Statistical Analysis. Pearson Prentice Hall, 2007. ISBN 9780131877153. URL
+https://books.google.com.co/books?id=gFWcQgAACAAJ.
+
+
+- C. K. Enders.Applied Missing Data Analysis. University of Pennsylvania, New York,USA, 2010
+
+- D. B. Rubin. Inference and missing data.Biometrika, 63(3):581–592, 1976.
+
+
+
+---
+
+# Bibliografía
+
+<div style="text-align: justify;
+margin-top:100px"
+
+<div/>
+
+- K. V. Mardia. Measures of multivariate skewness and kurtosis with applications.Biome-trika, 57(3):519–530, 1970.
+
+- J. Cao, J. Chow, J. Watson, and S. Lee. A brief history of pm2.5 and its adverse effects.AAQR, pages accepted–, 01 2013.
+
+- Godino Gomez, F. (2014), ‘Estimación de matrices de covarianzas: Nuevas perspectivas’.
+

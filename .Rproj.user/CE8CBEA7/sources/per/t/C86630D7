@@ -3,22 +3,22 @@
     "path": "C:/Users/Alejandro/Desktop/shiny/codigorber.R",
     "project_path": null,
     "type": "r_source",
-    "hash": "1259714388",
+    "hash": "2651987778",
     "contents": "",
     "dirty": false,
     "created": 1615718054535.0,
     "source_on_save": false,
     "relative_order": 2,
     "properties": {
-        "cursorPosition": "15,0",
-        "scrollLine": "0"
+        "cursorPosition": "58,0",
+        "scrollLine": "50"
     },
     "folds": "",
-    "lastKnownWriteTime": 1615827925,
+    "lastKnownWriteTime": 1615930251,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1615827925705,
+    "last_content_update": 1615930254027,
     "read_only": false,
     "read_only_alternatives": []
 }

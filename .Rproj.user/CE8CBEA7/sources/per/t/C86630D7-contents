@@ -254,3 +254,20 @@ pimppl<-ggplotly(pimp) %>%
   config(mathjax = "cdn")
 
 
+
+
+mu<-DC%>%
+  dplyr::filter(weekdays(Fecha)=="lunes")%>%
+  as.data.frame()%>%
+  dplyr::select(-Fecha)%>%
+  apply(2,mean)
+
+
+s<-DC%>%
+  dplyr::filter(weekdays(Fecha)=="lunes")%>%
+  as.data.frame()%>%
+  dplyr::select(-Fecha)%>%
+  cov()
+
+
+

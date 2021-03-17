@@ -1,0 +1,12 @@
+La presencia de datos faltante es un problema frecuente en cualquier análisis estadístico, por lo que resulta
+importante definir estrategias para abordarlo. De manera natural surge la necesidad de establecer mecanismos de 
+imputación con el fin de poder realizar mejores estimaciones, sin embargo, como se evidenció en este trabajo, cada 
+método de imputación debe tener una justificación y para poder aplicarlo se deben tener ciertas consideraciones, como 
+el tipo de datos que se quieren imputar, su proceso generador y el proceso generador de los datos faltantes. 
+
+Uno de los matores retos del trabajo fue establecer que los datos se pueden modelar haciendo uso de la distribución normal multivariada, cuya discusión sigue abierta para proximos trabajos y por otro lado probar que la falta de datos es completamente al azar (MCAR) o es al menos MAR, ya que esto permite realizar estimaciones a partir de los datos disponibles.
+
+Un factor importante a tener en cuenta es la dimensión y el tamaño de muestra de la base de datos, ya que la calidad de 
+los estimadores necesarios para realizar la imputación se puede ver afectada, como sucedió en este caso; A pesar de esto
+los resultados indican que el método propuesto es sobresaliente y se puede aplicar para obtener estimaciones más confiables.
+
