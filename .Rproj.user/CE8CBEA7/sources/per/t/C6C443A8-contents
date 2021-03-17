@@ -1,0 +1,1774 @@
+# Datos_de_calidad_del_aire_en_la_estaci_n_Compartir_2014_a_2018_en_Santiago_de_Cali <- read.csv("C:/Users/Alejandro/Downloads/Datos_de_calidad_del_aire_en_la_estaci_n_Compartir_2014_a_2018_en_Santiago_de_Cali.csv")
+# 
+library(astsa)
+# 
+# View(Datos_de_calidad_del_aire_en_la_estaci_n_Compartir_2014_a_2018_en_Santiago_de_Cali)
+# pm25<-Datos_de_calidad_del_aire_en_la_estaci_n_Compartir_2014_a_2018_en_Santiago_de_Cali
+
+#### Cargar librerias ----
+  library(nortest)
+library(xtable)
+library(readr)
+library(Amelia)
+library(MVN)
+# library(fda)
+# library(fda.usc)
+library(corrplot)
+library(RColorBrewer)
+library(lattice)
+library(plotly)
+library(MASS)
+library(condMVNorm)
+library(norm)
+library(corpcor)
+#### lectura y depuración de la base de datos ----
+  
+X6_univalle_2013_2018 <- read_delim("C:/Users/Alejandro/Desktop/6.-univalle-2013-2018.csv", 
+                                    ";", escape_double = FALSE, trim_ws = TRUE)
+
+pm25<-X6_univalle_2013_2018
+  
+  
+pm25<-as.data.frame(pm25)
+
+
+
+pm25<-pm25[,c(1,2)]
+head(pm25)
+
+str(pm25)
+
+  # A?O<-substr(pm25$`Fecha & Hora`,7,10)
+
+
+  fecha<-substr(pm25$`Fecha & Hora`,1,10)
+  fecha<-as.Date(fecha,format='%m/%d/%Y')
+ 
+  
+   year<-format(fecha,"%Y")
+  
+  pos_2018<-which(year=="2018")
+  
+
+  pm25_2018<-pm25[pos_2018,]
+  
+  fecha_2018<-fecha[pos_2018]
+
+  head(pm25_2018)
+
+
+diassor<-weekdays(fecha_2018)
+length(diassor)
+        
+nrow(pm25_2018)
+
+pm25_2018d<-cbind(pm25_2018,diassor)
+head(pm25_2018d)
+
+
+palam<-as.numeric(as.character(pm25_2018$`PM2,5 (ug/m3)`))
+
+
+
+diasm<- matrix(palam, nrow = length(unique(fecha_2018)), ncol = 24,byrow=TRUE)
+View(diasm)
+
+#### Fin de lecutura y depuración ----
+
+
+#### Grafico de faltantes ----
+
+d<-as.data.frame(diasm)
+
+colnames(d)<-c(1:24)
+
+x11()
+missmap(d,rank.order = F,y.labels =  c(365:1),main="Mapa de datos faltantes")
+
+
+#### Base de días completos e incompletos ----
+
+diasc<-c()
+canti<-c()
+
+for(i in 1:nrow(diasm)){
+  
+  
+  nl<-which(is.na(diasm[i,]))
+  canti[i]<-length(nl)
+  if(length(nl)==0){
+    diasc[i]<-"comp"
+    
+  }else{
+    
+    diasc[i]<-"inc"
+  }
+  
+  
+  
+}
+
+
+posc<-which(diasc=="comp")
+
+posic<-which(diasc=="inc")
+
+mdiasc<-diasm[posc,]
+
+mdiasic<-diasm[posic,]
+
+rownames(mdiasc)<-posc
+colnames(mdiasc)<-c(1:24)
+
+dias_a<-substr(weekdays(unique(fecha_2018)),1,3)
+
+dias_c<-dias_a[posc]
+
+dias_ic<-dias_a[posic]
+
+#### 
+
+#### Tabla faltantes ----
+
+tablaf<-summary(as.factor(canti))
+barplot(summary(as.factor(canti))[-1],main = "Cantidad de dÃ­as faltantes por nÃºmero de horas",xlab = "NÃºmero de horas",ylab = "Cantidad de dÃ­as")
+
+a<-rbind(
+  names(tablaf),tablaf)
+colnames(a)<-NULL
+
+
+rownames(a)<-c("Cantidad horas faltantes","NÃºmero de dÃ­as")
+
+xtable(a)
+
+####
+
+#### Boxplot todas las horas ----
+
+
+
+x11()
+par(mar=c(4.5,5,3,3))
+boxplot(mdiasc,main="Distribución de las horas del año 2018",xlab="Hora",ylab= expression(paste(PM[2.5] ," (",mu,"g/",m^3,")")),col="gray",ylim=c(0,80))
+abline(h=50,col="red",lty=2)
+abline(h=25,col="blue",lty=2)
+
+
+
+#### Boxplots días de la semana ----
+
+x11()
+par(mfrow=c(2,2))
+par(mar=c(4.5,5,3,3))
+
+
+boxplot(mdiasc[which(dias_c=="lun"),],main="Boxplot lunes",xlab="Hora",ylab= expression(PM[2.5](mu/m^3)),col="lightgreen",ylim=c(0,80))
+boxplot(mdiasc[which(dias_c=="mar"),],main="Boxplot martes",xlab="Hora",ylab= expression(PM[2.5](mu/m^3)),col="lightgreen",ylim=c(0,80))
+boxplot(mdiasc[which(dias_c=="mié"),],main="Boxplot miércoles",xlab="Hora",ylab= expression(PM[2.5](mu/m^3)),col="lightgreen",ylim=c(0,80))
+boxplot(mdiasc[which(dias_c=="jue"),],main="Boxplot jueves",xlab="Hora",ylab= expression(PM[2.5](mu/m^3)),col="lightgreen",ylim=c(0,80))
+
+
+x11()
+par(mfrow=c(2,2))
+par(mar=c(4.5,5,3,3))
+
+boxplot(mdiasc[which(dias_c=="vie"),],main="Boxplot viernes",xlab="Hora",ylab= expression(PM[2.5](mu/m^3)),col="lightgreen",ylim=c(0,80))
+boxplot(mdiasc[which(dias_c=="sáb"),],main="Boxplot sábado",xlab="Hora",ylab= expression(PM[2.5](mu/m^3)),col="lightgreen",ylim=c(0,80))
+boxplot(mdiasc[which(dias_c=="dom"),],main="Boxplot domingo",xlab="Hora",ylab= expression(PM[2.5](mu/m^3)),col="lightgreen",ylim=c(0,80))
+
+#### Matrices completas por días de la semana ----
+
+dial<-mdiasc[which(dias_c=="lun"),]
+
+diam<-mdiasc[which(dias_c=="mar"),]
+
+diami<-mdiasc[which(dias_c=="mié"),]
+
+diaju<-mdiasc[which(dias_c=="jue"),]
+
+diavi<-mdiasc[which(dias_c=="vie"),]
+
+diasa<-mdiasc[which(dias_c=="sáb"),]
+
+diado<-mdiasc[which(dias_c=="dom"),]
+
+
+#### Analisis de brechas ----
+#### Tamaño 1
+
+brechas1<-0
+
+cantbrei<-0
+
+cantbre<-c()
+for(i in 1:nrow(diasm)){
+  cantbrei<-0
+  
+  for(j in 1: ncol(diasm)){
+    
+    if (j==1){
+      
+      if(is.na(diasm[i,j])&!is.na(diasm[i,j+1])==TRUE){
+        
+        brechas1<-brechas1+1
+        cantbrei<-cantbrei+1
+      }
+      
+    }else{
+      if (j==24){
+        
+        if(is.na(diasm[i,j])&!is.na(diasm[i,j-1])==TRUE){
+          
+          brechas1<-brechas1+1
+          cantbrei<-cantbrei+1
+        }
+        
+      }  else{
+        
+        if(is.na(diasm[i,j])&!is.na(diasm[i,j-1])&!is.na(diasm[i,j+1])==TRUE){
+          
+          brechas1<-brechas1+1
+          cantbrei<-cantbrei+1
+        }
+        
+      }
+      
+    }
+    
+  }
+  
+  cantbre[i]<-cantbrei
+  
+}
+
+
+sum(cantbre==1)
+
+sum(cantbre==2)
+
+sum(cantbre==3)
+
+sum(cantbre==4)
+
+
+which(cantbre==2)
+
+sum(canti[which(cantbre==1)]==1)
+
+sum(canti[which(cantbre==2)]==2)
+
+sum(canti[which(cantbre==3)]==3)
+
+sum(canti[which(cantbre==4)]==4)
+
+#### tamaño 2
+brechas2<-0
+
+cantbrei2<-0
+
+cantbre2<-c()
+for(i in 1:nrow(diasm)){
+  cantbrei2<-0
+  
+  for(j in 1: (ncol(diasm)-1)){
+    
+    if (j==1){
+      
+      if(is.na(diasm[i,j])&is.na(diasm[i,j+1])&!is.na(diasm[i,j+2])==TRUE
+      ){
+        
+        brechas2<-brechas2+1
+        cantbrei2<-cantbrei2+1
+      }
+      
+    }else{
+      if (j==(ncol(diasm)-1)){
+        
+        if(is.na(diasm[i,j])&is.na(diasm[i,j+1])&!is.na(diasm[i,j-1])==TRUE
+        ){
+          
+          brechas2<-brechas2+1
+          cantbrei2<-cantbrei2+1
+        }
+        
+      }  else{
+        
+        if(is.na(diasm[i,j])&is.na(diasm[i,j+1])&!is.na(diasm[i,j+2])&!is.na(diasm[i,j-1])==TRUE
+        ){
+          
+          brechas2<-brechas2+1
+          cantbrei2<-cantbrei2+1
+        }
+        
+      }
+      
+    }
+    
+  }
+  
+  cantbre2[i]<-cantbrei2
+  
+}
+
+sum(cantbre2==1)
+
+sum(cantbre2==2)
+
+sum(cantbre2==3)
+
+
+
+sum(canti[which(cantbre2==1)]==2)
+
+sum(canti[which(cantbre2==2)]==4)
+
+sum(canti[which(cantbre2==3)]==6)
+
+#### tamaño 3
+
+brecha3<-0
+
+cantbrei3<-0
+
+cantbre3<-c()
+for(i in 1:nrow(diasm)){
+  cantbrei3<-0
+  
+  for(j in 1: (ncol(diasm)-2)){
+    
+    if (j==1){
+      
+      if(is.na(diasm[i,j])&is.na(diasm[i,j+1])&is.na(diasm[i,j+2])&!is.na(diasm[i,j+3])==TRUE
+      ){
+        
+        brecha3<-brecha3+1
+        cantbrei3<-cantbrei3+1
+      }
+      
+    }else{
+      if (j==(ncol(diasm)-2)){
+        
+        if(is.na(diasm[i,j])&is.na(diasm[i,j+1])&is.na(diasm[i,j+2])&!is.na(diasm[i,j-1])==TRUE
+        ){
+          
+          brecha3<-brecha3+1
+          cantbrei3<-cantbrei3+1
+        }
+        
+      }  else{
+        
+        if(is.na(diasm[i,j])&is.na(diasm[i,j+1])&is.na(diasm[i,j+2])&!is.na(diasm[i,j+3])&!is.na(diasm[i,j-1])==TRUE
+        ){
+          
+          brecha3<-brecha3+1
+          cantbrei3<-cantbrei3+1
+        }
+        
+      }
+      
+    }
+    
+  }
+  
+  cantbre3[i]<-cantbrei3
+  
+}
+
+
+
+sum(cantbre3==1)
+
+sum(cantbre3==2)
+
+
+sum(canti[which(cantbre3==1)]==3)
+
+sum(canti[which(cantbre3==2)]==6)
+
+#### Tamaño 4
+
+brecha4<-0
+
+cantbrei4<-0
+
+cantbre4<-c()
+for(i in 1:nrow(diasm)){
+  cantbrei4<-0
+  
+  for(j in 1: (ncol(diasm)-3)){
+    
+    if (j==1){
+      
+      if(is.na(diasm[i,j])&is.na(diasm[i,j+1])&is.na(diasm[i,j+2])&is.na(diasm[i,j+3])&!is.na(diasm[i,j+4])==TRUE
+      ){
+        
+        brecha4<-brecha4+1
+        cantbrei4<-cantbrei4+1
+      }
+      
+    }else{
+      if (j==(ncol(diasm)-3)){
+        
+        if(is.na(diasm[i,j])&is.na(diasm[i,j+1])&is.na(diasm[i,j+2])&is.na(diasm[i,j+3])&!is.na(diasm[i,j-1])==TRUE
+        ){
+          
+          brecha4<-brecha4+1
+          cantbrei4<-cantbrei4+1
+        }
+        
+      }  else{
+        
+        if(is.na(diasm[i,j])&is.na(diasm[i,j+1])&is.na(diasm[i,j+2])&is.na(diasm[i,j+3])&!is.na(diasm[i,j+4])&!is.na(diasm[i,j-1])==TRUE
+        ){
+          
+          brecha4<-brecha4+1
+          cantbrei4<-cantbrei4+1
+        }
+        
+      }
+      
+    }
+    
+  }
+  
+  cantbre4[i]<-cantbrei4
+  
+}
+
+sum(cantbre4==1)
+
+sum(canti[which(cantbre4==1)]==4)
+
+#### Tamaño 5
+
+brecha5<-0
+
+cantbrei5<-0
+
+cantbre5<-c()
+for(i in 1:nrow(diasm)){
+  cantbrei5<-0
+  
+  for(j in 1: (ncol(diasm)-4)){
+    
+    if (j==1){
+      
+      if(is.na(diasm[i,j])&is.na(diasm[i,j+1])&is.na(diasm[i,j+2])&is.na(diasm[i,j+3])&is.na(diasm[i,j+4])&!is.na(diasm[i,j+5])==TRUE
+      ){
+        
+        brecha5<-brecha5+1
+        cantbrei5<-cantbrei5+1
+      }
+      
+    }else{
+      if (j==(ncol(diasm)-4)){
+        
+        if(is.na(diasm[i,j])&is.na(diasm[i,j+1])&is.na(diasm[i,j+2])&is.na(diasm[i,j+3])&is.na(diasm[i,j+4])&!is.na(diasm[i,j-1])==TRUE
+        ){
+          
+          brecha5<-brecha5+1
+          cantbrei5<-cantbrei5+1
+        }
+        
+      }  else{
+        
+        if(is.na(diasm[i,j])&is.na(diasm[i,j+1])&is.na(diasm[i,j+2])&is.na(diasm[i,j+3])&is.na(diasm[i,j+4])&!is.na(diasm[i,j+5])&!is.na(diasm[i,j-1])==TRUE
+        ){
+          
+          brecha5<-brecha5+1
+          cantbrei5<-cantbrei5+1
+        }
+        
+      }
+      
+    }
+    
+  }
+  
+  cantbre5[i]<-cantbrei5
+  
+}
+
+sum(cantbre5==1)
+
+sum(canti[which(cantbre5==1)]==5)
+
+#### Tamaño 6
+
+brecha6<-0
+
+cantbrei6<-0
+
+cantbre6<-c()
+for(i in 1:nrow(diasm)){
+  cantbrei6<-0
+  
+  for(j in 1: (ncol(diasm)-5)){
+    
+    if (j==1){
+      
+      if(is.na(diasm[i,j])&is.na(diasm[i,j+1])&is.na(diasm[i,j+2])&is.na(diasm[i,j+3])&is.na(diasm[i,j+4])&is.na(diasm[i,j+5])&!is.na(diasm[i,j+6])==TRUE
+      ){
+        
+        brecha6<-brecha6+1
+        cantbrei6<-cantbrei6+1
+      }
+      
+    }else{
+      if (j==(ncol(diasm)-5)){
+        
+        if(is.na(diasm[i,j])&is.na(diasm[i,j+1])&is.na(diasm[i,j+2])&is.na(diasm[i,j+3])&is.na(diasm[i,j+4])&is.na(diasm[i,j+5])&!is.na(diasm[i,j-1])==TRUE
+        ){
+          
+          brecha6<-brecha6+1
+          cantbrei6<-cantbrei6+1
+        }
+        
+      }  else{
+        
+        if(is.na(diasm[i,j])&is.na(diasm[i,j+1])&is.na(diasm[i,j+2])&is.na(diasm[i,j+3])&is.na(diasm[i,j+4])&is.na(diasm[i,j+5])&!is.na(diasm[i,j+6])&!is.na(diasm[i,j-1])==TRUE
+        ){
+          
+          brecha6<-brecha6+1
+          cantbrei6<-cantbrei6+1
+        }
+        
+      }
+      
+    }
+    
+  }
+  
+  cantbre6[i]<-cantbrei6
+  
+}
+
+sum(cantbre6==1)
+
+sum(canti[which(cantbre6==1)]==6)
+
+#### Analisis del supuesto de normalidad multivariada, pruebas individuales ----
+
+mvn(dial,mvnTest = c( "mardia"))
+
+mvn(diam,mvnTest = c( "mardia"))
+
+mvn(diami,mvnTest = c( "mardia"))
+
+mvn(diaju,mvnTest = c( "mardia"))
+
+mvn(diavi,mvnTest = c( "mardia"))
+
+mvn(diasa,mvnTest = c( "mardia"))
+
+mvn(diado,mvnTest = c( "mardia"))
+
+
+xx<-cbind(mvn(dial,mvnTest = c( "mardia"))$univariateNormality$Normality,
+mvn(diam,mvnTest = c( "mardia"))$univariateNormality$Normality,
+mvn(diami,mvnTest = c( "mardia"))$univariateNormality$Normality,
+mvn(diaju,mvnTest = c( "mardia"))$univariateNormality$Normality,
+mvn(diavi,mvnTest = c( "mardia"))$univariateNormality$Normality,
+mvn(diasa,mvnTest = c( "mardia"))$univariateNormality$Normality,
+mvn(diado,mvnTest = c( "mardia"))$univariateNormality$Normality
+)
+
+colnames(xx)<-unique(weekdays(unique(fecha_2018)))
+
+rownames(xx)<-c(0:23)
+
+xtable(xx)
+
+for(i in 1:24){
+  for(j in 1:7){
+    if(xx[i,j]=="   YES   "){
+      
+      xx[i,j]<-TRUE
+    }else{
+      
+      xx[i,j]<-FALSE
+      
+    }
+    
+  }
+}
+
+sum<-c(length(which(xx[,1]=="TRUE")),length(which(xx[,2]=="TRUE")),length(which(xx[,3]=="TRUE")),length(which(xx[,4]=="TRUE"))
+  ,length(which(xx[,5]=="TRUE")),length(which(xx[,6]=="TRUE")),length(which(xx[,7]=="TRUE")))
+xx<-rbind(xx,sum)
+
+rownames(xx)<-c(0:23,"Total TRUE")
+
+xtable(xx)
+
+
+### construcción de los datos funcionales ----
+
+names=list()
+names[[1]]="Datos 2018"
+names[[2]]="Horas del día"
+names[[3]]="PM_2.5"
+
+names(names)<-c("main","xlab","ylab")
+
+argvals1<-c(1:24)
+
+dc<-fdata(mdiasc,argvals = argvals1,names=names)
+
+class(dc)
+dc.fd <- fdata2fd(dc, type.basis= "bspline", nbasis= 9)
+
+dc.fd$coefs
+
+plot(dc.fd,main="bspline",xlab=names$xlab,ylab=names$ylab)
+
+
+salida<-min.basis(dc,type.CV = GCV.S,type.basis = "bspline",rangeval=c(1:24),numbasis = seq(4,24,by=1))
+score<-salida$gcv
+salida$numbasis.opt
+
+plot(c(4:24),score,main="bspline",xlab="nÃºmero de bases", ylab="Score",ylim = c(1,180),xlim = c(4,24))
+
+which.min(score)
+
+salida$numbasis[which.min(score)]
+
+salida2<-min.basis(dc,type.CV = GCV.S,type.basis = "bspline",rangeval=c(1:24),numbasis = 10,lambda = seq(0,100,by=0.5))
+
+salida2$lambda.opt
+
+score<-salida2$gcv
+
+plot(seq(0,100,by=0.5),score)
+
+dc.fd <- fdata2fd(dc, type.basis= "bspline", nbasis= 10,lambda = 13)
+
+plot(dc.fd[which(dias_c=="mar"),][1,],main="bspline",xlab=names$xlab,ylab=names$ylab)
+
+mean.fd(dc.fd)
+plot(mean.fd(dc.fd),main="bspline",xlab=names$xlab,ylab=names$ylab)
+
+
+vardc.df<-var.fd(dc.fd[which(dias_c=="lun"),])
+
+persp(cor.fd(c(0:23),dc.fd[which(dias_c=="lun"),]))
+
+evalvardc.df<-eval.bifd(c(0:23),c(0:23),vardc.df)
+
+plot(dc.fd[which(dias_c=="mié"),],main="bspline",xlab=names$xlab,ylab=names$ylab)
+
+plot(mean(dc.fd[which(dias_c=="lun"),]),add=T,col=4,lwd=2)
+
+plot(sd.fd(dc.fd[which(dias_c=="lun"),]),col=2,add=T)
+
+
+plot(mean.fd(dc.fd[which(dias_c=="lun"),]),col=1,lwd=1,ylim = c(20,35))
+plot(mean.fd(dc.fd[which(dias_c=="mar"),]),col=2,lwd=1,add=T)
+plot(mean(dc.fd[which(dias_c=="mié"),]),col=3,lwd=1,add=T)
+plot(mean(dc.fd[which(dias_c=="jue"),]),col=4,lwd=1,add=T)
+plot(mean(dc.fd[which(dias_c=="vie"),]),col=5,lwd=1,add=T)
+plot(mean(dc.fd[which(dias_c=="sáb"),]),col=6,lwd=1,add=T)
+plot(mean(dc.fd[which(dias_c=="dom"),]),col=7,lwd=1,add=T)
+
+
+persp(c(0:23),c(0:23),evalvardc.df,
+      xlab="hora", ylab="hora", zlab="Covariance")
+
+persp(c(0:23),c(0:23),cov(dial),
+      xlab="hora", ylab="hora", zlab="Covariance")
+
+
+
+
+
+# ####Grafico de covarianza 3d ----
+# 
+# 
+# fig <- plot_ly(z = ~ cov(dial))
+# fig <- fig %>% add_surface()
+# fig
+# 
+# fig <- plot_ly(z = ~ eval2)
+# fig <- fig %>% add_surface()
+# fig
+
+#### matrices de covarianza -----
+
+
+levelplot(cov(dial))
+
+coul <- colorRampPalette(brewer.pal(8, "PiYG"))(25)
+levelplot(cov(dial), col.regions = coul)
+
+#### matrices de correlación ----
+
+
+corrplot(cor(dial),main="Correlación horaria día lunes",  mar=c(0,0,1,0))
+corrplot(cor(diam),main="Correlación horaria día martes",  mar=c(0,0,1,0))
+corrplot(cor(diami),main="Correlación horaria día miércoles",  mar=c(0,0,1,0))
+corrplot(cor(diaju),main="Correlación horaria día jueves",  mar=c(0,0,1,0))
+corrplot(cor(diavi),main="Correlación horaria día viernes",  mar=c(0,0,1,0))
+corrplot(cor(diasa),main="Correlación horaria día sábado",  mar=c(0,0,1,0))
+corrplot(cor(diado),main="Correlación horaria día domingo",  mar=c(0,0,1,0))
+
+
+#### Estructura de mvn para pruebas de normalidad multivariada ----
+
+mvn(data, subset = NULL, mvnTest = c("mardia", "hz", "royston", "dh",
+                                     "energy"), covariance = TRUE, tol = 1e-25, alpha = 0.5,
+    scale = FALSE, desc = TRUE, transform = "none", R = 1000,
+    univariateTest = c("SW", "CVM", "Lillie", "SF", "AD"),
+    univariatePlot = "none", multivariatePlot = "none",
+    multivariateOutlierMethod = "none", bc = FALSE, bcType = "rounded",
+    showOutliers = FALSE, showNewData = FALSE)
+
+
+
+
+#### gráfico qq a mano -----
+
+
+mu<-apply(dial,2,mean)
+
+dj<-c()
+
+for (i in 1:nrow(dial)){
+
+dj[i]<-mahalanobis(x = dial[i,],center = mu,cov = cov(dial))
+
+}
+
+sort(dj)
+
+n <- length(dj)
+a <- 0.5 
+
+
+quant <- (1:n-a)/(n+1-2*a) 
+plot(sort(dj),qchisq(p=quant, df=24))
+datos.cuartiles <- quantile(dj,
+                            c(0.01,0.99))
+norm.cuartiles <- qchisq(p=c(0.01, 0.99),df=24)
+b <- (datos.cuartiles[2] - datos.cuartiles[1] ) /
+  (norm.cuartiles[2] - norm.cuartiles[1])
+a <- datos.cuartiles[1] - norm.cuartiles[1] * b
+abline(a, b) 
+
+#### qq plot de cada día de la semana ----
+
+MVN::mvn(dial[,c(1:24)],mvnTest = c( "mardia") ,multivariatePlot = "qq")
+MVN::mvn(diam[,c(1:24)],mvnTest = c( "mardia") ,multivariatePlot = "qq")
+MVN::mvn(diami[,c(1:24)],mvnTest = c( "mardia") ,multivariatePlot = "qq")
+MVN::mvn(diaju[,c(1:24)],mvnTest = c( "mardia") ,multivariatePlot = "qq")
+MVN::mvn(diavi[,c(1:24)],mvnTest = c( "mardia") ,multivariatePlot = "qq")
+MVN::mvn(diasa[,c(1:24)],mvnTest = c( "mardia") ,multivariatePlot = "qq")
+MVN::mvn(diado[,c(1:24)],mvnTest = c( "mardia") ,multivariatePlot = "qq")
+
+#### Distribucion condicional prueba ----
+
+obs<-dial[4,]
+
+##### Vectores de medias y matrices de covarianza para cada dia de la semana
+
+mu<-apply(dial,2,mean)
+mu2<-apply(diam,2,mean)
+mu3<-apply(diami,2,mean)
+mu4<-apply(diaju,2,mean)
+mu5<-apply(diavi,2,mean)
+mu6<-apply(diasa,2,mean)
+mu7<-apply(diado,2,mean)
+
+s<-cov(dial)
+s2<-cov(diam)
+s3<-cov(diami)
+s4<-cov(diaju)
+s5<-cov(diavi)
+s6<-cov(diasa)
+s7<-cov(diado)
+
+
+obs2<-obs
+
+obs2[c(10:13)]<-NA
+
+est<-condMVN(mu, s, dependent.ind=which(is.na(obs2)), given.ind=which(!is.na(obs2)) , X.given=na.omit(obs2), 
+        check.sigma=FALSE)
+
+plot(obs2,type = "l",ylim=c(10,50))
+points(which(is.na(obs2)),est$condMean,pch=20,cex=0.8,col="red")
+points(which(is.na(obs2)),est$condMean,type="l",col="red")
+
+points(which(is.na(obs2)),est$condMean+1.96*sqrt(diag(est$condVar)),pch=25,col="red",bg="red",cex=0.7)
+points(which(is.na(obs2)),est$condMean-1.96*sqrt(diag(est$condVar)),type="l",col="red")
+points(which(is.na(obs2)),est$condMean-1.96*sqrt(diag(est$condVar)),pch=24,col="red",bg="red",cex=0.7)
+points(which(is.na(obs2)),est$condMean+1.96*sqrt(diag(est$condVar)),type="l",col="red")
+
+points(obs,pch=20,cex=0.8)
+
+points( which(is.na(obs2)),mvrnorm(n = 1, est$condMean, est$condVar),col="blue",pch=20)
+ 
+#### Prueba de little paso a paso ----
+
+# todos<-diasm[which(dias_a=="lun"),  ]
+# 
+# test<-todos
+# 
+# na<-which(is.na(test))
+# nona<-which(!is.na(test))
+# 
+# test[na]<-1
+# test[nona]<-0
+# 
+# don<-todos
+# 
+# pre <- prelim.norm(as.matrix(don))
+# thetahat <- em.norm(pre)
+# par<-getparam.norm(pre,thetahat)
+# 
+# mu<-par$mu
+# s<-par$sigma
+# 
+# ind<-c()
+# 
+# for (j in 1:nrow(unique.matrix(test, MARGIN = 1))) {
+#   
+#   for(i in 1:nrow(test)){
+#    if( sum(test[i,]==unique.matrix(test, MARGIN = 1)[j,])==24){
+#      
+#      ind[i]<-j
+# 
+#    }
+#     
+#     
+#     
+#   }
+#   
+#   
+#   
+# }
+# 
+# ind
+# 
+# 
+# Sj<-list()
+# 
+# 
+# 
+# for (j in 1:length( unique(ind))) {
+# Sj[[j]]<-todos[which(ind==j),]  
+# }
+# 
+# Sj
+# 
+# Dj<-list()
+# for(j in 1:length( unique(ind))){
+#   
+#   if(sum(unique.matrix(test, MARGIN = 1)[j,])==0){
+#   Dj[[j]]<-  diag(1,24,24)
+#     
+#   }else{
+#     
+#     Dj[[j]]<-diag(1,24,24)[,-c(which(unique.matrix(test, MARGIN = 1)[j,]==1))]
+# 
+#     
+#   }
+#   
+#   
+# }
+# 
+# Dj
+# 
+# ybobsj<-list()
+# muobsj<-list()
+# sobsj<-list()
+# mj<-c()
+# 
+#   
+# 
+#   
+# for (j in 1:length( unique(ind))) {
+#   
+#   if (is.null(nrow(Sj[[j]]))) {
+#     ybobsj[[j]]<-na.omit(Sj[[j]])
+#     mj[j]<-1
+#   }else{
+#     
+#     ybobsj[[j]]<-  apply(t(na.omit(t(Sj[[j]]))),2,mean)
+# 
+#     mj[j]<-nrow(Sj[[j]])
+#   }
+#   
+#   
+#   muobsj[[j]]<-mu%*%Dj[[j]]
+#   
+#   sobsj[[j]]<-t(Dj[[j]])%*%s%*%Dj[[j]]
+#   
+#   }
+# 
+# 
+# ybobsj   
+# mj
+# muobsj
+# sobsj
+# 
+# 
+# dj2<-list()
+# 
+# for (j in 1:length( unique(ind))) {
+#   if(dim(sobsj[[j]])[1]!=0){
+#   dj2[[j]]<-mj[j]*(   (ybobsj[[j]]- muobsj[[j]])%*%solve(sobsj[[j]])%*%t(ybobsj[[j]]- muobsj[[j]])  )
+#   }
+#   
+# }
+# 
+# 
+# 
+#   pjs<-c()
+# 
+# for (j in 1:length( unique(ind))){
+#   
+#   pjs[j]<-ncol(Dj[[j]])
+#   
+# }
+# 
+# 
+# sum ( pjs)-24
+# 
+# sum(unlist(dj2))
+
+
+
+
+
+####prubea de little función ----
+
+littleR<-function(X){
+  
+  todos<-X
+  
+  test<-todos
+  
+  na<-which(is.na(test))
+  nona<-which(!is.na(test))
+  
+  test[na]<-1
+  test[nona]<-0
+  
+  library(norm)
+  
+  don<-todos
+  
+  pre <- prelim.norm(as.matrix(don))
+  thetahat <- em.norm(pre)
+  par<-getparam.norm(pre,thetahat)
+  
+  mu<-par$mu
+  s<-par$sigma
+  
+  ind<-c()
+  
+  for (j in 1:nrow(unique.matrix(test, MARGIN = 1))) {
+    
+    for(i in 1:nrow(test)){
+      if( sum(test[i,]==unique.matrix(test, MARGIN = 1)[j,])==24){
+        
+        ind[i]<-j
+        
+      }
+      
+      
+      
+    }
+    
+    
+    
+  }
+  
+  ind
+  
+  
+  Sj<-list()
+  
+  
+  
+  for (j in 1:length( unique(ind))) {
+    Sj[[j]]<-todos[which(ind==j),]  
+  }
+  
+  
+  
+  Dj<-list()
+  for(j in 1:length( unique(ind))){
+    
+    if(sum(unique.matrix(test, MARGIN = 1)[j,])==0){
+      Dj[[j]]<-  diag(1,24,24)
+      
+    }else{
+      
+      Dj[[j]]<-diag(1,24,24)[,-c(which(unique.matrix(test, MARGIN = 1)[j,]==1))]
+      
+      
+    }
+    
+    
+  }
+  
+  Dj
+  
+  ybobsj<-list()
+  muobsj<-list()
+  sobsj<-list()
+  mj<-c()
+  
+  
+  
+  
+  for (j in 1:length( unique(ind))) {
+    
+    if (is.null(nrow(Sj[[j]]))) {
+      ybobsj[[j]]<-na.omit(Sj[[j]])
+      mj[j]<-1
+    }else{
+      
+      ybobsj[[j]]<-  apply(t(na.omit(t(Sj[[j]]))),2,mean)
+      
+      mj[j]<-nrow(Sj[[j]])
+    }
+    
+    
+    muobsj[[j]]<-mu%*%Dj[[j]]
+    
+    sobsj[[j]]<-t(Dj[[j]])%*%s%*%Dj[[j]]
+    
+  }
+  
+  
+  ybobsj   
+  mj
+  muobsj
+  sobsj
+  
+  
+  dj2<-list()
+  
+  for (j in 1:length( unique(ind))) {
+    if(dim(sobsj[[j]])[1]!=0){
+      dj2[[j]]<-mj[j]*(   (ybobsj[[j]]- muobsj[[j]])%*%solve(sobsj[[j]])%*%t(ybobsj[[j]]- muobsj[[j]])  )
+    }
+    
+  }
+  
+  
+  
+  pjs<-c()
+  
+  for (j in 1:length( unique(ind))){
+    
+    pjs[j]<-ncol(Dj[[j]])
+    
+  }
+  
+  
+  GL<-  sum ( pjs)-24
+  
+  d2<-  sum(unlist(dj2))
+  
+  chi<-pchisq(d2,GL,lower.tail = FALSE)
+  
+  res<-list()
+  res[[1]]<-GL
+  res[[2]]<-d2
+  res[[3]]<-chi
+  res[[4]]<-length(unique(ind))
+  return(res)
+  
+}
+
+todos<-diasm[which(dias_a=="dom"),  ]
+
+cant<-c()
+
+for (i in 1:nrow(todos)) {
+  
+
+cant[i]<-sum(is.na(todos[i,]))
+
+  }
+
+todos<-todos[which(cant<7), ]
+
+
+littleR(todos)
+
+
+#### Matrices días de la semana incompletos ----
+
+dialic<-mdiasic[which(dias_ic=="lun"),]
+
+diamic<-mdiasic[which(dias_ic=="mar"),]
+
+diamiic<-mdiasic[which(dias_ic=="mié"),]
+
+diajuic<-mdiasic[which(dias_ic=="jue"),]
+
+diaviic<-mdiasic[which(dias_ic=="vie"),]
+
+diasaic<-mdiasic[which(dias_ic=="sáb"),]
+
+diadoic<-mdiasic[which(dias_ic=="dom"),]
+
+#### Función filtro de 1 a 6 datos por día ----
+
+fildias<-function(X){
+  
+  cant<-c()
+  for (i in 1:nrow(X)) {
+    
+    
+    cant[i]<-sum(is.na(X[i,]))
+    
+  }
+  
+  
+  
+  X<-X[which(cant<7), ]
+  
+  res<-list()
+  cant2<-cant[which(cant<7)]
+  
+  res[[1]]<-X
+  res[[2]]<-cant2
+  
+  names(res)<-c("Filtro","Cant_falt")
+  return(res)
+  
+}
+
+
+
+dialic<-fildias(dialic)  
+
+diamic<-fildias(diamic)  
+
+diamiic<-fildias(diamiic)  
+
+diajuic<-fildias(diajuic)  
+
+diaviic<-fildias(diaviic)  
+
+diasaic<-fildias(diasaic)  
+
+diadoic<-fildias(diadoic)  
+
+
+allpimp<-fildias(mdiasic)
+
+
+nrow( allpimp$Filtro)
+
+boxplot(allpimp$Filtro)
+
+length( which(is.na(allpimp$Filtro)))/length(allpimp$Filtro)
+
+
+#### Función para imputar en los días faltantes, escenario real ----
+
+fimp2<-function(minp,ds,forma="normal"){
+  
+  mu<-apply(dial,2,mean)
+  mu2<-apply(diam,2,mean)
+  mu3<-apply(diami,2,mean)
+  mu4<-apply(diaju,2,mean)
+  mu5<-apply(diavi,2,mean)
+  mu6<-apply(diasa,2,mean)
+  mu7<-apply(diado,2,mean)
+
+  if(forma=="normal"){
+    
+  s<-cov(dial)
+  s2<-cov(diam)
+  s3<-cov(diami)
+  s4<-cov(diaju)
+  s5<-cov(diavi)
+  s6<-cov(diasa)
+  s7<-cov(diado)
+  }else{
+
+
+  s<-cov.shrink(dial, lambda=0.2, lambda.var=0)
+  s2<-cov.shrink(diam, lambda=0.2, lambda.var=0)
+  s3<-cov.shrink(diami, lambda=0.2, lambda.var=0)
+  s4<-cov.shrink(diaju, lambda=0.2, lambda.var=0)
+  s5<-cov.shrink(diavi, lambda=0.2, lambda.var=0)
+  s6<-cov.shrink(diasa, lambda=0.2, lambda.var=0)
+  s7<-cov.shrink(diado, lambda=0.2, lambda.var=0)
+
+
+  }
+  
+  for(i in 1:nrow(minp)){
+    
+    
+    
+    if(ds=="lun"){
+      
+      
+      est<-condMVN(mu, s, dependent.ind=which(is.na(minp[i,])), given.ind=which(!is.na(minp[i,])) , X.given=na.omit(minp[i,]), 
+                   check.sigma=FALSE)
+      
+      
+      
+      gen<-mvrnorm(n = 1, est$condMean, est$condVar)
+      
+      p=0
+      
+      while(p<300 & length(which(gen<0))!=0 ){
+        
+        gen<-mvrnorm(n = 1, est$condMean, est$condVar)
+        
+        p=p+1 
+        
+      }
+      minp[i,which(is.na(minp[i,]))]<-gen
+      
+    }else{
+      if(ds=="mar"){
+        
+        
+        est<-condMVN(mu2, s2, dependent.ind=which(is.na(minp[i,])), given.ind=which(!is.na(minp[i,])) , X.given=na.omit(minp[i,]), 
+                     check.sigma=FALSE)
+        
+        
+        
+        gen<-mvrnorm(n = 1, est$condMean, est$condVar)
+        
+        p=0
+        
+        while(p<300 & length(which(gen<0))!=0 ){
+          
+          gen<-mvrnorm(n = 1, est$condMean, est$condVar)
+          
+          p=p+1 
+          
+        }
+        minp[i,which(is.na(minp[i,]))]<-gen
+        
+      }else{
+        if(ds=="mié"){
+          
+          
+          est<-condMVN(mu3, s3, dependent.ind=which(is.na(minp[i,])), given.ind=which(!is.na(minp[i,])) , X.given=na.omit(minp[i,]), 
+                       check.sigma=FALSE)
+          
+          
+          
+          gen<-mvrnorm(n = 1, est$condMean, est$condVar)
+          
+          p=0
+          
+          while(p<300 & length(which(gen<0))!=0 ){
+            
+            gen<-mvrnorm(n = 1, est$condMean, est$condVar)
+            
+            p=p+1 
+            
+          }
+          minp[i,which(is.na(minp[i,]))]<-gen
+          
+        }else{
+          if(ds=="jue"){
+            
+            
+            est<-condMVN(mu4, s4, dependent.ind=which(is.na(minp[i,])), given.ind=which(!is.na(minp[i,])) , X.given=na.omit(minp[i,]), 
+                         check.sigma=FALSE)
+            
+            
+            
+            gen<-mvrnorm(n = 1, est$condMean, est$condVar)
+            
+            p=0
+            
+            while(p<300 & length(which(gen<0))!=0 ){
+              
+              gen<-mvrnorm(n = 1, est$condMean, est$condVar)
+              
+              p=p+1 
+              
+            }
+            minp[i,which(is.na(minp[i,]))]<-gen
+            
+          }else{
+            
+            if(ds=="vie"){
+              
+              
+              
+              est<-condMVN(mu5, s5, dependent.ind=which(is.na(minp[i,])), given.ind=which(!is.na(minp[i,])) , X.given=na.omit(minp[i,]), 
+                           check.sigma=FALSE)
+              
+              
+              
+              gen<-mvrnorm(n = 1, est$condMean, est$condVar)
+              
+              p=0
+              
+              while(p<300 & length(which(gen<0))!=0 ){
+                
+                gen<-mvrnorm(n = 1, est$condMean, est$condVar)
+                
+                p=p+1 
+                
+              }
+              minp[i,which(is.na(minp[i,]))]<-gen
+              
+            }else{
+              
+              if(ds=="sáb"){
+                
+                
+                est<-condMVN(mu6, s6, dependent.ind=which(is.na(minp[i,])), given.ind=which(!is.na(minp[i,])) , X.given=na.omit(minp[i,]), 
+                             check.sigma=FALSE)
+                
+                
+                
+                gen<-mvrnorm(n = 1, est$condMean, est$condVar)
+                
+                p=0
+                
+                while(p<300 & length(which(gen<0))!=0 ){
+                  
+                  gen<-mvrnorm(n = 1, est$condMean, est$condVar)
+                  
+                  p=p+1 
+                  
+                }
+                minp[i,which(is.na(minp[i,]))]<-gen
+                
+              }else{
+                
+                if(ds=="dom"){
+                  
+                  
+                  est<-condMVN(mu7, s7, dependent.ind=which(is.na(minp[i,])), given.ind=which(!is.na(minp[i,])) , X.given=na.omit(minp[i,]), 
+                               check.sigma=FALSE)
+                  
+                  
+                  
+                  gen<-mvrnorm(n = 1, est$condMean, est$condVar)
+                  
+                  p=0
+                  
+                  while(p<300 & length(which(gen<0))!=0 ){
+                    
+                    gen<-mvrnorm(n = 1, est$condMean, est$condVar)
+                    
+                    p=p+1 
+                    
+                  }
+                  minp[i,which(is.na(minp[i,]))]<-gen
+                  
+                  
+                }
+                
+                
+              }
+              
+              
+            }
+            
+            
+          }
+          
+          
+          
+        }
+        
+        
+      }
+      
+      
+    }
+    
+    
+    
+    
+    
+  }
+  
+  
+  
+  return(minp)
+  
+  
+}
+
+
+#### imputación de cada dia de la semana ----
+
+dialimp1_6<-fimp2(dialic$Filtro,"lun","2")
+
+diamimp1_6<-fimp2(diamic$Filtro,"mar","2")  
+
+diamiimp1_6<-fimp2(diamiic$Filtro,"mié","2")  
+
+diajuimp1_6<-fimp2(diajuic$Filtro,"jue","2")  
+
+diaviimp1_6<-fimp2(diaviic$Filtro,"vie","2")  
+
+diasaimp1_6<-fimp2(diasaic$Filtro,"sáb","2")  
+
+diadoimp1_6<-fimp2(diadoic$Filtro,"dom","2")  
+
+
+
+dialimp1_6<-fimp2(dialic$Filtro,"lun","normal")
+
+diamimp1_6<-fimp2(diamic$Filtro,"mar","normal")  
+
+diamiimp1_6<-fimp2(diamiic$Filtro,"mié","normal")  
+
+diajuimp1_6<-fimp2(diajuic$Filtro,"jue","normal")  
+
+diaviimp1_6<-fimp2(diaviic$Filtro,"vie","normal")  
+
+diasaimp1_6<-fimp2(diasaic$Filtro,"sáb","normal")  
+
+diadoimp1_6<-fimp2(diadoic$Filtro,"dom","normal")  
+
+
+
+
+#### cuantos negativos se generaron ----
+
+imputed<-rbind(dialimp1_6,diamimp1_6,diamiimp1_6,diajuimp1_6,diaviimp1_6,diasaimp1_6,diadoimp1_6)
+
+length( which(imputed<0))/length(imputed)
+
+length( which(imputed<0))/168
+
+#### boxplot imptuados ----
+
+par(mfrow=c(2,2))
+
+
+
+boxplot(dialimp1_6,main="Boxplot Lun. con imputaciones",xlab="Hora")
+title(ylab= expression(paste(PM[2.5] ," (",mu,"g/",m^3,")")), line=2, cex.lab=1)
+abline(h=0,col="red")
+
+boxplot(diamimp1_6,main="Boxplot Mar. con imputaciones",xlab="Hora")
+title(ylab= expression(paste(PM[2.5] ," (",mu,"g/",m^3,")")), line=2, cex.lab=1)
+
+abline(h=0,col="red")
+
+boxplot(diamiimp1_6,main="Boxplot Mié. con imputaciones",xlab="Hora")
+title(ylab= expression(paste(PM[2.5] ," (",mu,"g/",m^3,")")), line=2, cex.lab=1)
+
+abline(h=0,col="red")
+
+boxplot(diajuimp1_6,main="Boxplot Jue. con imputaciones",xlab="Hora")
+title(ylab= expression(paste(PM[2.5] ," (",mu,"g/",m^3,")")), line=2, cex.lab=1)
+abline(h=0,col="red")
+
+par(mfrow=c(2,2))
+
+boxplot(diaviimp1_6,main="Boxplot Vie. con imputaciones",xlab="Hora")
+title(ylab= expression(paste(PM[2.5] ," (",mu,"g/",m^3,")")), line=2, cex.lab=1)
+abline(h=0,col="red")
+
+boxplot(diasaimp1_6,main="Boxplot Sáb. con imputaciones",xlab="Hora")
+title(ylab= expression(paste(PM[2.5] ," (",mu,"g/",m^3,")")), line=2, cex.lab=1)
+abline(h=0,col="red")
+
+boxplot(diadoimp1_6,main="Boxplot Dom. con imputaciones",xlab="Hora")
+title(ylab= expression(paste(PM[2.5] ," (",mu,"g/",m^3,")")), line=2, cex.lab=1)
+abline(h=0,col="red")
+
+#### Medias imputados y no imputados
+
+  plot(1:24,apply(dialimp1_6,2,mean),pch=20,ylim=c(10,40),col="blue",
+     main = "Media horaria de datos no imputados e imputados día lunes",
+     xlab = "Hora",ylab= expression(PM[2.5](mu/m^3)))
+
+meanna<-c()
+for (i in 1:24){
+  meanna[i]<-mean(na.omit( dialic$Filtro[,i]))
+  }
+points((1:24)+0.1,meanna,pch=20,col="black")
+legend("topleft", 
+       legend = c("Datos imputados","Datos no imputados"), 
+       col = c("blue","black"), 
+       pch = c(20,20), 
+       text.col = "black", 
+       horiz = F , 
+       bty = "n"
+)
+
+
+####
+
+
+plot(1:24,apply(diamimp1_6,2,mean),pch=20,ylim=c(10,40),col="blue",
+     main = "Media horaria de datos no imputados e imputados día martes",
+     xlab = "Hora",ylab= expression(PM[2.5](mu/m^3)))
+
+meanna<-c()
+for (i in 1:24){
+  meanna[i]<-mean(na.omit( diamic$Filtro[,i]))
+}
+points((1:24)+0.1,meanna,pch=20,col="black")
+legend("topleft", 
+       legend = c("Datos imputados","Datos no imputados"), 
+       col = c("blue","black"), 
+       pch = c(20,20), 
+       text.col = "black", 
+       horiz = F , 
+       bty = "n"
+)
+
+
+####
+
+plot(1:24,apply(diamiimp1_6,2,mean),pch=20,ylim=c(10,40),col="blue",
+     main = "Media horaria de datos no imputados e imputados día miércoles",
+     xlab = "Hora",ylab= expression(PM[2.5](mu/m^3)))
+
+meanna<-c()
+for (i in 1:24){
+  meanna[i]<-mean(na.omit( diamiic$Filtro[,i]))
+}
+points((1:24)+0.1,meanna,pch=20,col="black")
+legend("topleft", 
+       legend = c("Datos imputados","Datos no imputados"), 
+       col = c("blue","black"), 
+       pch = c(20,20), 
+       text.col = "black", 
+       horiz = F , 
+       bty = "n"
+)
+
+
+####
+
+
+plot(1:24,apply(diajuimp1_6,2,mean),pch=20,ylim=c(10,40),col="blue",
+     main = "Media horaria de datos no imputados e imputados día jueves",
+     xlab = "Hora",ylab= expression(PM[2.5](mu/m^3)))
+
+meanna<-c()
+for (i in 1:24){
+  meanna[i]<-mean(na.omit( diajuic$Filtro[,i]))
+}
+points((1:24)+0.1,meanna,pch=20,col="black")
+legend("topleft", 
+       legend = c("Datos imputados","Datos no imputados"), 
+       col = c("blue","black"), 
+       pch = c(20,20), 
+       text.col = "black", 
+       horiz = F , 
+       bty = "n"
+)
+
+####
+
+
+plot(1:24,apply(diaviimp1_6,2,mean),pch=20,ylim=c(10,40),col="blue",
+     main = "Media horaria de datos no imputados e imputados día viernes",
+     xlab = "Hora",ylab= expression(PM[2.5](mu/m^3)))
+
+meanna<-c()
+for (i in 1:24){
+  meanna[i]<-mean(na.omit( diaviic$Filtro[,i]))
+}
+points((1:24)+0.1,meanna,pch=20,col="black")
+legend("topleft", 
+       legend = c("Datos imputados","Datos no imputados"), 
+       col = c("blue","black"), 
+       pch = c(20,20), 
+       text.col = "black", 
+       horiz = F , 
+       bty = "n"
+)
+
+####
+
+plot(1:24,apply(diasaimp1_6,2,mean),pch=20,ylim=c(10,40),col="blue",
+     main = "Media horaria de datos no imputados e imputados día sábado",
+     xlab = "Hora",ylab= expression(PM[2.5](mu/m^3)))
+
+meanna<-c()
+for (i in 1:24){
+  meanna[i]<-mean(na.omit( diasaic$Filtro[,i]))
+}
+points((1:24)+0.1,meanna,pch=20,col="black")
+legend("topleft", 
+       legend = c("Datos imputados","Datos no imputados"), 
+       col = c("blue","black"), 
+       pch = c(20,20), 
+       text.col = "black", 
+       horiz = F , 
+       bty = "n"
+)
+####
+
+plot(1:24,apply(diadoimp1_6,2,mean),pch=20,ylim=c(10,40),col="blue",
+     main = "Media horaria de datos no imputados e imputados día domingo",
+     xlab = "Hora",ylab= expression(PM[2.5](mu/m^3)))
+
+meanna<-c()
+for (i in 1:24){
+  meanna[i]<-mean(na.omit( diadoic$Filtro[,i]))
+}
+points((1:24)+0.1,meanna,pch=20,col="black")
+legend("topleft", 
+       legend = c("Datos imputados","Datos no imputados"), 
+       col = c("blue","black"), 
+       pch = c(20,20), 
+       text.col = "black", 
+       horiz = F , 
+       bty = "n"
+)
+
+
+
+
+#######################################esto ya no sirve para nada y no sé que es lo de abajo xdxdxd
+
+
+
+plot(1:24,mu,col=2,type="l",ylim = c(10,35),
+     main = "Media horaria de los días de la semana",
+     xlab = "Hora",ylab= expression(PM[2.5](mu/m^3)))
+points(1:24,mu,pch=20,col=2)
+
+points(1:24,mu2,col=3,type="l")
+points(1:24,mu2,pch=20,col=3)
+
+points(1:24,mu3,col=4,type="l")
+points(1:24,mu3,pch=20,col=4)
+
+points(1:24,mu4,col=5,type="l")
+points(1:24,mu4,pch=20,col=5)
+
+points(1:24,mu5,col=6,type="l")
+points(1:24,mu5,pch=20,col=6)
+
+points(1:24,mu6,col=7,type="l")
+points(1:24,mu6,pch=20,col=7)
+
+points(1:24,mu7,col=8,type="l")
+points(1:24,mu7,pch=20,col=8)
+
+legend("bottomleft",
+       legend = c("Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"),
+       col = 2:8, 
+       pch = c(20,20,20), 
+       lty = rep(1,8),
+       pt.cex = 1, 
+       cex = 1, 
+       text.col = "black", 
+       horiz = F , 
+       bty = "n" 
+       
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+boxplot(mdiasc)
+abline(h=0)
+
+which.min(imputed[,21])
+
+imputed[49]
+
+View(mdiasc)
+
+diam
+
+length(which(mdiasc>50))/length(mdiasc)
+
+length(which(mdiasc>25))/length(mdiasc)
+
+length( which(apply(mdiasc,1,mean)>25))/length(apply(mdiasc,1,mean)>25)
+
+length( which(apply(mdiasc,1,mean)>50))/length(apply(mdiasc,1,mean)>25)
+
+frecrel<-c( length( which(is.na(diasm[which(dias_a=="lun"),])))/length(diasm[which(dias_a=="lun"),])
+,
+length( which(is.na(diasm[which(dias_a=="mar"),])))/length(diasm[which(dias_a=="lun"),])
+,
+length( which(is.na(diasm[which(dias_a=="mié"),])))/length(diasm[which(dias_a=="lun"),])
+,
+
+length( which(is.na(diasm[which(dias_a=="jue"),])))/length(diasm[which(dias_a=="lun"),])
+,
+
+length( which(is.na(diasm[which(dias_a=="vie"),])))/length(diasm[which(dias_a=="lun"),])
+
+,
+length( which(is.na(diasm[which(dias_a=="sáb"),])))/length(diasm[which(dias_a=="lun"),])
+
+,
+length( which(is.na(diasm[which(dias_a=="dom"),])))/length(diasm[which(dias_a=="lun"),])
+)
+
+cantfaldia<-c(length( which(is.na(diasm[which(dias_a=="lun"),])))
+,
+length( which(is.na(diasm[which(dias_a=="mar"),])))
+,
+length( which(is.na(diasm[which(dias_a=="mié"),])))
+,
+length( which(is.na(diasm[which(dias_a=="jue"),])))
+,
+length( which(is.na(diasm[which(dias_a=="vie"),])))
+,
+length( which(is.na(diasm[which(dias_a=="sáb"),])))
+,
+length( which(is.na(diasm[which(dias_a=="dom"),])))
+)
+
+sum(cantfaldia)/8760
+
+library(xtable)
+aa<-cbind(cantfaldia,frecrel)ff
+
+xtable(aa)
+
+aaa<-rbind( frecrel,1-frecrel)
+rownames(aaa)<-c("Faltantes","Completos")
+barplot(aaa,names=c("Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"),col=c("red","grey"),main="Proporción de datos faltantes por día",legend=T,width = 0.3, xlim = c(0, 3.5))
+####

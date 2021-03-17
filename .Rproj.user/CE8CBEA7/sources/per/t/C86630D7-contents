@@ -256,18 +256,65 @@ pimppl<-ggplotly(pimp) %>%
 
 
 
-mu<-DC%>%
+mu<-dcomp%>%
   dplyr::filter(weekdays(Fecha)=="lunes")%>%
   as.data.frame()%>%
   dplyr::select(-Fecha)%>%
   apply(2,mean)
 
 
-s<-DC%>%
+s<-dcomp%>%
   dplyr::filter(weekdays(Fecha)=="lunes")%>%
   as.data.frame()%>%
   dplyr::select(-Fecha)%>%
   cov()
 
+
+  siu<-dcomp%>%
+  dplyr::filter(weekdays(Fecha)=="lunes")%>%
+  as.data.frame()%>%
+  dplyr::select(-Fecha)
+
+hg<-siu[4,]
+
+hg[10:13]<-NA
+  
+hg<- as.numeric(hg)
+
+est<-condMVN(mu, s, dependent.ind=which(is.na(hg)), given.ind=which(!is.na(hg)) , X.given=na.omit(hg), 
+             check.sigma=FALSE)
+
+media<-c()
+media[1:24]<-NA
+media[which(is.na(hg))]<-est$condMean
+
+gen<-mvrnorm(n = 1, est$condMean, est$condVar)
+
+generado<-c()
+
+generado[1:24]<-NA
+
+generado[which(is.na(hg))]<-gen
+
+dato<-as.data.frame(cbind(as.numeric(colnames(siu)),as.numeric(siu[4,]),hg,media,generado))
+
+colnames(dato)<-c("V1","Observados","Contaminados","Med_Cond","Generados")
+
+ppaj<-ggplot(dato)+
+  geom_line(aes(y=Contaminados,x= V1,color="Contaminados") )+
+  geom_point(aes(y=Med_Cond,x= V1,color="Med_Cond"),size=2  )+
+  geom_point(aes(y=Observados,x= V1,color="Observados"))+
+  geom_point(aes(y=Generados,x= V1,color="Generados"))+
+  
+  scale_color_manual(values = c(
+  'Contaminados' = 'black',
+  'Med_Cond' = 'red',
+  'Observados' = 'black',
+  'Generados' = 'blue')) +
+  labs(color = 'Series')+
+  xlab("Horas")+
+  ylab("PM2.5")
+
+ggplotly(ppaj)
 
 

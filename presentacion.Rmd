@@ -18,7 +18,8 @@ library(lubridate)
 library(reshape)
 library(plotly)
 library(ggcorrplot)
-
+library(MASS)
+library(condMVNorm)
 
 ```
 
@@ -522,6 +523,7 @@ Así el método de imputación propuesto se basa en utilizar la distribución co
 
 <div/>
 
+
 ---
 
 
@@ -543,7 +545,99 @@ Nota:
 
 <div/>
 
+---
 
+# Marco teórico
+
+## Metodología de imputación
+
+<div style="text-align: center">
+<div/>
+
+```{r fig.width=6, message=FALSE, warning=FALSE}
+
+basepm<-read_delim("C:/Users/Alejandro/Desktop/6.-univalle-2013-2018.csv", 
+                   ";", escape_double = FALSE, trim_ws = TRUE)
+a<-basepm %>%
+  dplyr::select(-c("NO2  (ug/m3)" , "O3  (ug/m3)"  )) %>%
+  dplyr::rename(Fecha=`Fecha & Hora`, PM2.5=`PM2,5 (ug/m3)`) %>%
+  summarize(Fecha,hora=as.factor(as.numeric(str_sub(Fecha,-5,-4))+1),PM2.5=PM2.5) %>%
+  mutate(Fecha=as.Date(Fecha,format='%m/%d/%Y'),PM2.5=as.numeric(PM2.5)) %>%
+  filter(year(Fecha) =="2018") %>%
+  cast(Fecha~hora)
+
+dcomp<-a %>%
+  filter(apply(a, 1, function(x){sum(is.na(x))})==0)
+
+dinc<-a %>%
+  filter(apply(a, 1, function(x){sum(is.na(x))})>0)
+
+mu<-dcomp%>%
+  dplyr::filter(weekdays(Fecha)=="lunes")%>%
+  as.data.frame()%>%
+  dplyr::select(-Fecha)%>%
+  apply(2,mean)
+
+
+s<-dcomp%>%
+  dplyr::filter(weekdays(Fecha)=="lunes")%>%
+  as.data.frame()%>%
+  dplyr::select(-Fecha)%>%
+  cov()
+
+
+  siu<-dcomp%>%
+  dplyr::filter(weekdays(Fecha)=="lunes")%>%
+  as.data.frame()%>%
+  dplyr::select(-Fecha)
+
+hg<-siu[4,]
+
+hg[10:13]<-NA
+  
+hg<- as.numeric(hg)
+
+est<-condMVN(mu, s, dependent.ind=which(is.na(hg)), given.ind=which(!is.na(hg)) , X.given=na.omit(hg), 
+             check.sigma=FALSE)
+
+media<-c()
+media[1:24]<-NA
+media[which(is.na(hg))]<-est$condMean
+
+gen<-mvrnorm(n = 1, est$condMean, est$condVar)
+
+generado<-c()
+
+generado[1:24]<-NA
+
+generado[which(is.na(hg))]<-gen
+
+dato<-as.data.frame(cbind(as.numeric(colnames(siu)),as.numeric(siu[4,]),hg,media,generado))
+
+colnames(dato)<-c("V1","Observados","Contaminados","Med_Cond","Generados")
+
+ppaj<-ggplot(dato)+
+  geom_line(aes(y=Contaminados,x= V1,color="Contaminados") )+
+  geom_point(aes(y=Med_Cond,x= V1,color="Med_Cond"),size=2  )+
+  geom_point(aes(y=Observados,x= V1,color="Observados"))+
+  geom_point(aes(y=Generados,x= V1,color="Generados"))+
+  
+  scale_color_manual(values = c(
+  'Contaminados' = 'black',
+  'Med_Cond' = 'red',
+  'Observados' = 'black',
+  'Generados' = 'blue')) +
+  labs(color = 'Series')+
+  xlab("Horas")+
+  ylab("PM2.5")
+
+pajpl<-ggplotly(ppaj)
+
+
+
+htmltools::div(pajpl, align="center" )  # Result is now an HTML object
+
+```
 ---
 
 
@@ -870,15 +964,7 @@ $$R^2= \left(\frac{1}{H}\frac{\sum_{h=1}^{H}(\hat{x}_h-\bar{\hat{x}})*(x_h - \ba
 ```{r message=FALSE, warning=FALSE}
 library(Amelia)
 
-basepm<-read_delim("C:/Users/Alejandro/Desktop/6.-univalle-2013-2018.csv", 
-                   ";", escape_double = FALSE, trim_ws = TRUE)
-a<-basepm %>%
-  dplyr::select(-c("NO2  (ug/m3)" , "O3  (ug/m3)"  )) %>%
-  dplyr::rename(Fecha=`Fecha & Hora`, PM2.5=`PM2,5 (ug/m3)`) %>%
-  summarize(Fecha,hora=as.factor(as.numeric(str_sub(Fecha,-5,-4))+1),PM2.5=PM2.5) %>%
-  mutate(Fecha=as.Date(Fecha,format='%m/%d/%Y'),PM2.5=as.numeric(PM2.5)) %>%
-  filter(year(Fecha) =="2018") %>%
-  cast(Fecha~hora)
+
 missmap(a[,-1],rank.order = F,y.labels =  c(365:1),main="Mapa de datos faltantes")
 ```
 
@@ -1039,17 +1125,7 @@ margin-top:100px">
 <div/>
 
 ```{r  message=FALSE, warning=FALSE}
-basepm<-read_delim("C:/Users/Alejandro/Desktop/6.-univalle-2013-2018.csv", 
-                   ";", escape_double = FALSE, trim_ws = TRUE)
 
-
-a<-basepm %>%
-  dplyr::select(-c("NO2  (ug/m3)" , "O3  (ug/m3)"  )) %>%
-  dplyr::rename(Fecha=`Fecha & Hora`, PM2.5=`PM2,5 (ug/m3)`) %>%
-  summarize(Fecha,hora=as.factor(as.numeric(str_sub(Fecha,-5,-4))+1),PM2.5=PM2.5) %>%
-  mutate(Fecha=as.Date(Fecha,format='%m/%d/%Y'),PM2.5=as.numeric(PM2.5)) %>%
-  filter(year(Fecha) =="2018") %>%
-  cast(Fecha~hora)
 
 
 
@@ -1095,11 +1171,7 @@ margin-top:100px">
 ```{r message=FALSE, warning=FALSE}
 
 
-dcomp<-a %>%
-  filter(apply(a, 1, function(x){sum(is.na(x))})==0)
 
-dinc<-a %>%
-  filter(apply(a, 1, function(x){sum(is.na(x))})>0)
 
 p<-dcomp %>%
   melt(id="Fecha") %>%
